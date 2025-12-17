@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import {BrowserRouter as Router} from "rea"
 import './App.css'
 
 function App() {
