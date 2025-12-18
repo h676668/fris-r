@@ -1,28 +1,26 @@
-import { useState } from 'react'
-import './App.css'
-import Header from './Components/Header'
-import Hero from './Components/Hero'
-import Contact from './Components/Contact'
+import React from 'react';
+import './App.css';
+import Header from './Components/Header';
+import Hero from './Components/Hero';
+import Contact from './Components/Contact';
+import OmOss from './Components/OmOss';
+import Tjenester from './Components/Tjenester';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-    <Header />
-<div className="pt-20 lg:pt-24">
+    <div className="min-h-screen bg-white">
+      <Header />
       
-      <Hero />
-      <section id="Omoss" className="min-h-screen bg-gray-50 flex items-center justify-center border-b">
-          <div className="text-center">
-            <h2 className="text-4xl font-bold mb-4">Om Oss</h2>
-            <p className="text-gray-600">Her kommer informasjon om frisørsalongen.</p>
-          </div>
-        </section>
+      {/* Container for innholdet under Header */}
+      <main className="pt-20 lg:pt-24">
+        <Hero />
+        <Tjenester/>
+        <OmOss/>
+        
         <Contact />
+      </main>
     </div>
-    </>
-  )
+  );
 }
 
-export default App
+export default App;
