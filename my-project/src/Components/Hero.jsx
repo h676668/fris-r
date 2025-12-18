@@ -1,7 +1,7 @@
 import React, { useState } from 'react'; // 1. Importer useState
 import RingOssBox from './RingossBox';
 
-const Hero = () => {
+const Hero = ({ onBookingClick }) => {
   // 2. Opprett state for å styre modalen
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -47,7 +47,7 @@ const Hero = () => {
             Ring oss
           </button>
           
-          <button className="bg-white border border-zinc-700 text-zinc-700 hover:border-red-800 hover:text-red-800 font-bold py-5 px-12 rounded-full transition-all active:scale-95 hover:scale-105">
+          <button  onClick={onBookingClick} className="bg-white border border-zinc-700 text-zinc-700 hover:border-red-800 hover:text-red-800 font-bold py-5 px-12 rounded-full transition-all active:scale-95 hover:scale-105">
             Bestill time
           </button>
         </div>

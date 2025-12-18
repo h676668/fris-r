@@ -10,7 +10,7 @@ import Bestilling from './Components/Bestilling';
 function App() {
   const [showModal, setShowModal] = useState(false);
 
-  // Valgfritt: Hindrer scrolling av selve nettsiden når modalen er åpen
+  //Hindrer scrolling av selve nettsiden når modalen er åpen
   useEffect(() => {
     if (showModal) {
       document.body.style.overflow = 'hidden';
@@ -25,7 +25,7 @@ function App() {
       <Header onBookingClick={() => setShowModal(true)} />
       
       <main className="pt-20 lg:pt-24">
-        <Hero />
+        <Hero onBookingClick={() => setShowModal(true)}/>
         <Tjenester />
         <OmOss />
         <Contact />
