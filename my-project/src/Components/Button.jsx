@@ -1,6 +1,6 @@
 const Button = ({ className, href, onClick, children }) => {
     
-    const classes = `bg-[#673131] border border-n-6 
+    const classes = `bg-red-900 border border-n-6 
     text-white px-8 py-3 rounded-full font-light uppercase
      text-[11px] tracking-[0.2em] no-underline transition-all 
      duration-300 ease-in-out hover:bg-zinc-900 hover:scale-105 
