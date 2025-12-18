@@ -4,18 +4,15 @@ import { useState } from "react";
  import Button from "./Button";
 
 
-const Header = () => {
-    const pathname=useLocation();
+ const Header = ({ onBookingClick }) => {
+    
+    const pathname = useLocation();
     const [openNavbar, setOpenNavbar] = useState(false);
 
     const toggleNavigation = () => {
         setOpenNavbar(!openNavbar);
     };
 
-    const handleClick = () => {
-        if (!openNavbar) return;
-        setOpenNavbar(false);
-    };
 
     return (
         <>
@@ -44,7 +41,7 @@ const Header = () => {
 
 </nav>
 
-  <Button href="#BestillTime" className="hidden lg:inline-block">
+  <Button  onClick={onBookingClick} className="hidden lg:inline-block">
   Bestill Time
 </Button>
 
