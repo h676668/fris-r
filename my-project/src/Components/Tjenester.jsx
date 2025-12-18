@@ -1,37 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { tjenester } from '../constants';
 
-const tjenester = [
-  {
-    tittel: "Klassisk Klipp",
-    beskrivelse: "Skreddersydd klipp som passer din ansiktsform og stil.",
-    pris: "fra 349,-",
-    nummer: "01"
-  },
-  {
-    tittel: "Hårvask & Kur",
-    beskrivelse: "Dyprens og pleie for hodebunn og hår med premium produkter.",
-    pris: "fra 199,-",
-    nummer: "02"
-  },
-  {
-    tittel: "Barbering & Fade",
-    beskrivelse: "Presisjonsarbeid med kniv og maskin for den perfekte looken.",
-    pris: "fra 399,-",
-    fremhevet: true,
-    nummer: "03"
-  },
-  {
-    tittel: "Skjeggtrim",
-    beskrivelse: "Forming og pleie av skjegg for en velstelt fremtoning.",
-    pris: "fra 249,-",
-    nummer: "04"
-  },
-];
+
 
 const Tjenester = () => {
   return (
-    <section id="tjenester" className="py-24 bg-zinc-50 overflow-hidden">
+    <section id="Tjenester" className="py-24 bg-zinc-50 overflow-hidden">
       <div className="container mx-auto px-6">
         
         {/* Overskrift Seksjon */}
@@ -49,7 +24,7 @@ const Tjenester = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.7, delay: index * 0.15 }}
               whileHover={{ y: -10 }}
-              className={`group relative p-8 h-full min-h-[320px] flex flex-col justify-between transition-all duration-500 ${
+              className={`group relative p-8 h-full min-h-80 flex flex-col justify-between transition-all duration-500 ${
                 item.fremhevet 
                 ? 'bg-red-900 text-white shadow-2xl rounded-tr-[4rem]' 
                 : 'bg-white border border-zinc-200 hover:border-red-800/30 rounded-br-[4rem]'
