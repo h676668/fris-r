@@ -32,7 +32,7 @@ const OmOss = () => {
               <motion.img 
                 src={KontaktBilde} 
                 alt="Kontakt oss på Bergen Frisør" 
-                className="w-full h-auto object-cover max-h-150 brightness-[1] contrast-[1.1] grayscale-[20%]"
+                className="w-full h-auto object-cover max-h-150 brightness-[1] contrast-[1.1] grayscale-20"
                 whileHover={{ grayscale: 0, brightness: 1 }} // Går fra "matted farge" til full farge på hover
                 transition={{ duration: 0.4 }}
               />
