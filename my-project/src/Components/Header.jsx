@@ -29,22 +29,40 @@ import { useEffect, useState } from "react";
         <div className="fixed top-0  w-full z-50 bg-n-8/90 
         backdrop-blur-sm border-b border-n-6 lg:bg-n-8/90
          lg:backdrop-blur-sm">
+
+
        {/* Elementer som er inni Navigasjonbar "inkludert bestillKnappen"(avstand , plassering og responsive kode til alle enheter )*/}
-        <div className=" flex items-center px5 lg:px-7.5 xl:px-10 max-lg:py-4 ">
+        <div className="flex items-center w-full px-5 lg:px-7.5 xl:px-10 max-lg:py-4 ">
 
-     {/* hvordan elementer skal bli vist når man trykker på hamburger*/}
-    <nav  className={`${openNavbar ? "flex " : "hidden"} fixed h-full top-20 left-0 right-0 bottom-0 bg-white lg:static lg:flex
-       lg:mx-auto lg:bg-transparent`}>
-
-    <div className="relative z-2 flex flex-col items-center justify-center m-auto lg:flex-row">
+     {/* hvordan elementer skal bli vist når man trykker på hamburger (med animasjon)*/}
+     <nav
+  className={`
+    absolute top-full left-0 w-full bg-white
+    flex-col items-center pb-6
+    transition-all duration-300 ease-in-out
+    rounded-2xl shadow-2xs
+    ${openNavbar
+      ? "flex opacity-100 translate-y-0"
+      : "pointer-events-none opacity-0 -translate-y-4"}
+    
+    lg:pointer-events-auto
+    lg:static lg:flex lg:flex-row lg:bg-transparent
+    lg:flex-1 lg:justify-center lg:pb-0
+    lg:opacity-100 lg:translate-y-0 lg:transition-none
+    lg:rounded-none lg:shadow-none
+  `}
+>
+                            
+    <div className="relative z-50 flex flex-col items-center justify-center lg:flex-row">
     {navigationBarElements.map((item) => (
     <a
    key={item.id}
     href={item.url}
+    onClick={() => setOpenNavbar(false)}
     //skriftstyle på elementer som er i navbar.
     className={`block relative font-code text-2xl uppercase transition-colors hover:text-red-800 px-6 py-6 md:py-8 lg:-mr-px lg:text-xs lg:font-semibold
      ${
-        //sette rød farge på elemente som er valgt
+        //sette rød farge på elementet som er valgt
    item.url === pathname.hash ? "text-red-800" : "lg:text-n-1/50"
  } lg:leading-5 lg:hover:text-n-1 xl:px-12`}
 >
@@ -56,7 +74,7 @@ import { useEffect, useState } from "react";
 
 </nav>
 
-  <Button  onClick={onBookingClick} className="hidden lg:inline-block">
+  <Button  onClick={onBookingClick} className="hidden lg:inline-flex ml-auto">
   Bestill Time
 </Button>
 
