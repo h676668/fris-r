@@ -34,7 +34,7 @@ import { useEffect, useState } from "react";
        {/* Elementer som er inni Navigasjonbar "inkludert bestillKnappen"(avstand , plassering og responsive kode til alle enheter )*/}
         <div className="flex items-center w-full px-5 lg:px-7.5 xl:px-10 max-lg:py-4 ">
 
-     {/* hvordan elementer skal bli vist når man trykker på hamburger (med animasjon)*/}
+     {/* hvordan elementer skal bli vist når man trykker på hamburger + animasjon på mobilmeny)*/}
      <nav
   className={`
     absolute top-full left-0 w-full bg-white
@@ -53,7 +53,7 @@ import { useEffect, useState } from "react";
   `}
 >
                             
-    <div className="relative z-50 flex flex-col items-center justify-center lg:flex-row">
+    <div className=" flex flex-col items-center justify-center lg:flex-row">
     {navigationBarElements.map((item) => (
     <a
    key={item.id}
