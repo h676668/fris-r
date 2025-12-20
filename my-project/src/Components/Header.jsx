@@ -38,7 +38,7 @@ import { useEffect, useState } from "react";
      <nav
   className={`
     absolute top-full left-0 w-full bg-white
-    flex-col items-center pb-6
+    flex flex-col items-center pb-6
     transition-all duration-300 ease-in-out
     rounded-2xl shadow-2xs
     ${openNavbar
@@ -60,7 +60,7 @@ import { useEffect, useState } from "react";
     href={item.url}
     onClick={() => setOpenNavbar(false)}
     //skriftstyle på elementer som er i navbar.
-    className={`block relative font-code text-2xl uppercase transition-colors hover:text-red-800 px-6 py-6 md:py-8 lg:-mr-px lg:text-xs lg:font-semibold
+    className={`block font-code text-2xl uppercase transition-colors hover:text-red-800 px-6 py-6 md:py-8 lg:-mr-px lg:text-xs lg:font-semibold
      ${
         //sette rød farge på elementet som er valgt
    item.url === pathname.hash ? "text-red-800" : "lg:text-n-1/50"
@@ -74,6 +74,7 @@ import { useEffect, useState } from "react";
 
 </nav>
 
+ {/* kaller Button Component)*/}
   <Button  onClick={onBookingClick} className="hidden lg:inline-flex ml-auto">
   Bestill Time
 </Button>
