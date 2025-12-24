@@ -2,15 +2,16 @@ import React, { useState } from 'react'; // 1. Importer useState
 import RingOssBox from './RingossBox';
 
 const Hero = ({ onBookingClick }) => {
-  // 2. Opprett state for å styre modalen
+// Opprett state for å styre modalen (Ring oss Knappen)
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
+    //hvordan elementer på hjem seksjon skal bli vist 
     <section id="Hjem" className="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-white px-6 py-12">
       
       <div className="container mx-auto z-10 flex flex-col items-center text-center space-y-8">
         
-        {/* Overskrift - animeres først */}
+        {/* Overskrift style + animasjon */}
         <div className="space-y-4 animate-fade-up opacity-0">
           <h2 className="text-red-800 font-bold text-lg md:text-xl uppercase tracking-widest">
             Drop-in og timebestilling i Bergen
@@ -20,7 +21,7 @@ const Hero = ({ onBookingClick }) => {
           </h1>
         </div>
         
-        {/* Undertekst - litt forsinket (delay-1) */}
+        {/* Undertekst style og animasjon (litt forsinket (delay-1)) */}
         <p className="font-light uppercase text-[14px] md:text-[16px] tracking-[0.3em] text-zinc-500 mx-auto max-w-3xl leading-loose animate-fade-up opacity-0 delay-1">
           Opplev <span className="text-red-900 font-bold">kvalitet</span>, 
           <span className="text-red-900 font-bold"> komfort</span> og 
@@ -53,7 +54,7 @@ const Hero = ({ onBookingClick }) => {
         </div>
       </div>
       
-      {/* 4. Modal-komponenten lagt til i bunnen */}
+      {/* kalle RingOssBox component hvis isModelOpen = true */}
       <RingOssBox 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 

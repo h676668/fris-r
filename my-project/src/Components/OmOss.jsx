@@ -55,14 +55,14 @@ const OmOss = () => {
             className="text-left -mt-12 md:-mt-24" 
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-black tracking-tight">
-              Om Oss
+              Om oss
             </h2>
             
             <div className="space-y-4 text-gray-600 text-lg leading-relaxed">
               <p>
                 Velkommen til <span className="text-red-800 font-semibold">Bergen Frisør</span>. 
-                Vi holder til sentralt i Bergen og brenner for faget vårt. Hos oss er målet 
-                alltid at du skal gå ut døren med en frisyre du elsker og en følelse av velvære.
+                Vi holder til sentralt i Bergen og brenner for faget vårt. 
+                Vi ønsker at hvert besøk hos oss skal gi deg både en frisyre du elsker og en god opplevelse.
               </p>
               <p>
                 Vårt team består av erfarne frisører som holder seg oppdatert på de nyeste 
@@ -75,7 +75,7 @@ const OmOss = () => {
               <div className="flex items-center gap-4">
                 <span className="w-16 h-0.5 bg-red-800"></span>
                 <span className="font-bold uppercase tracking-[0.2em] text-xs text-zinc-400">
-                  Etablert 2024
+                  2025
                 </span>
               </div>
             </div>
