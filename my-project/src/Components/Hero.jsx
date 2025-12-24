@@ -1,5 +1,6 @@
-import React, { useState } from 'react'; // 1. Importer useState
+import React, { useState } from 'react'; 
 import RingOssBox from './RingossBox';
+import BakgrunnElementer from './BakgrunnElementer';
 
 const Hero = ({ onBookingClick }) => {
 // Opprett state for å styre modalen (Ring oss Knappen)
@@ -8,6 +9,11 @@ const Hero = ({ onBookingClick }) => {
   return (
     //hvordan elementer på hjem seksjon skal bli vist 
     <section id="Hjem" className="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-white px-6 py-12">
+
+      {/* Dekorative prikker (bakgrunn) */}
+      <BakgrunnElementer position="top-10 left-10"  color='text-zinc-500'/>
+      <BakgrunnElementer position="bottom-10 right-10" color='text-zinc-500'/>
+ 
       
       <div className="container mx-auto z-10 flex flex-col items-center text-center space-y-8">
         

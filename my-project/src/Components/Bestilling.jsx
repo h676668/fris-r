@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import DatePicker from 'react-datepicker'; // Husk å installere: npm install react-datepicker
+import DatePicker from 'react-datepicker';// ferdiglaget kalenderverktøy 
 import "react-datepicker/dist/react-datepicker.css";
-import { ledigeTider } from '../constants'; // Legg til dette i App.css eller index.css og tilpass styling
+import { ledigeTider } from '../constants';
+import BakgrunnElementer from './BakgrunnElementer';
 
 
 
 const Bestilling = () => {
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null); //Variabel som lagrer dato
   const [selectedTime, setSelectedTime] = useState(null);
   const [bekreftet, setBekreftet] = useState(false);
 
+
+  // funkjson for å håndtere bestilling.
   const handleBooking = () => {
     if (selectedDate && selectedTime) {
       setBekreftet(true);
-      // Her ville du normalt sende data til en backend
+      // sende data til en backend
       console.log(`Time bestilt: ${selectedDate.toDateString()} kl. ${selectedTime}`);
     } else {
       alert("Vennligst velg både dato og tidspunkt.");
@@ -22,7 +25,8 @@ const Bestilling = () => {
   };
 
   return (
-    <section id="BestillTime" className="py-24 bg-zinc-100 overflow-hidden scroll-mt-24">
+    //style og animasjon på title 
+    <section id="BestillTime" className="py-24 bg-zinc-100 overflow-hidden ">
       <div className="container mx-auto px-6 text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -34,6 +38,7 @@ const Bestilling = () => {
           <h3 className="text-4xl md:text-5xl font-black text-zinc-900 mb-16">Bestill din time</h3>
         </motion.div>
 
+       {/* viser bekreftelse hvis bekreftet variabel = true*/}
         {bekreftet ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
@@ -52,7 +57,8 @@ const Bestilling = () => {
               Bestill ny time
             </button>
           </motion.div>
-        ) : (
+        ) :
+         (
           <div className="flex flex-col lg:flex-row items-center justify-center gap-12">
             {/* Dato Velger Boks */}
             <motion.div
@@ -63,7 +69,7 @@ const Bestilling = () => {
               className="bg-white p-6 rounded-2xl shadow-xl border border-zinc-200 relative z-10 w-full max-w-sm"
             >
               {/* Rød prikkete bakgrunn */}
-              <div className="absolute -top-6 -left-6 text-red-600 opacity-20 text-3xl select-none">••••</div>
+              <BakgrunnElementer position='-top-6 -left-6' size='text-3xl'/>
 
               <h4 className="text-xl font-bold mb-4 text-left text-zinc-800">Velg Dato</h4>
               <div className="datepicker-container">
@@ -96,7 +102,7 @@ const Bestilling = () => {
                           ${selectedDate ? 'border-red-600' : ''}`} // Rød ramme når dato er valgt
             >
               {/* Rød prikkete bakgrunn */}
-              <div className="absolute -bottom-6 -right-6 text-red-600 opacity-20 text-3xl select-none">▲▲▲</div>
+              <BakgrunnElementer position='-bottom-6 -right-6' size='text-3xl'/>
 
               <h4 className="text-xl font-bold mb-4 text-left text-zinc-800">Velg Tidspunkt</h4>
               <div className="grid grid-cols-3 gap-3">
