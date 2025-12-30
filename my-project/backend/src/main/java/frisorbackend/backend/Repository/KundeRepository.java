@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import frisorbackend.backend.Model.Kunde;
 
 @Repository
-public interface KundeRepository extends JpaRepository<Kunde, Long> {
+public interface KundeRepository extends JpaRepository<Kunde, String> {
     
    
     List<Kunde> findByNavn(String navn);
@@ -16,4 +16,6 @@ public interface KundeRepository extends JpaRepository<Kunde, Long> {
     List<Kunde> findByEpost(String epost);
     
     List<Kunde> findByNavnContaining(String delAvNavn);
+
+    List<Kunde> findByMobilnummer(String mobilnummer);
 }

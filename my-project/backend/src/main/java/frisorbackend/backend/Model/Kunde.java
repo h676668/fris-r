@@ -7,15 +7,12 @@ import jakarta.persistence.*;
 public class Kunde {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id") 
-    private Long kundeId;
+    @Column(name = "Mobilnummer")
+    private String mobilnummer;
     
     @Column(name = "Navn", nullable = false)
     private String navn;
-    
-    @Column(name = "Mobilnummer", length = 20)
-    private String mobilnummer;
+ 
     
     @Column(name = "Epost")
     private String epost;
@@ -30,13 +27,6 @@ public class Kunde {
     }
     
 
-    public Long getKundeId() {
-        return kundeId;
-    }
-    
-    public void setKundeId(Long kundeId) {
-        this.kundeId = kundeId;
-    }
     
     public String getNavn() {
         return navn;
@@ -65,7 +55,7 @@ public class Kunde {
     @Override
     public String toString() {
         return "Kunde{" +
-                "kundeId=" + kundeId +
+                "kundeId=" +
                 ", navn='" + navn + '\'' +
                 ", mobilnummer='" + mobilnummer + '\'' +
                 ", epost='" + epost + '\'' +
