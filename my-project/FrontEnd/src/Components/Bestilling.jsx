@@ -4,6 +4,7 @@ import DatePicker from 'react-datepicker';// ferdiglaget kalenderverktøy
 import "react-datepicker/dist/react-datepicker.css";
 import { ledigeTider } from '../constants';
 import BakgrunnElementer from './BakgrunnElementer';
+import RegistrerKundeBox from './RegistrerKundeBox';
 
 
 
@@ -11,18 +12,45 @@ const Bestilling = () => {
   const [selectedDate, setSelectedDate] = useState(null); //Variabel som lagrer dato
   const [selectedTime, setSelectedTime] = useState(null);
   const [bekreftet, setBekreftet] = useState(false);
+  const [visBoks, setVisBoks] = useState(false);
+  const [boksMelding, setBoksMelding] = useState("Skriv inn ditt mobilnummer for å fortsette.");
+  const [erFeil, setErFeil] = useState(false);
 
 
-  // funkjson for å håndtere bestilling.
-  const handleBooking = () => {
-    if (selectedDate && selectedTime) {
-      setBekreftet(true);
-      // sende data til en backend
-      console.log(`Time bestilt: ${selectedDate.toDateString()} kl. ${selectedTime}`);
-    } else {
-      alert("Vennligst velg både dato og tidspunkt.");
+
+
+  //Database connection
+  const fullforBestilling = async (mobilnummer) => {
+    const response = await fetch(`http://localhost:8080/kunder/${mobilnummer}`);
+  
+    if (response.ok) {
+      const kundeData = await response.json();
+      console.log("Kunde funnet i databasen:", kundeData);
+       //viktig å nullstille state hvis det mobilnummer finnes i database
+      setErFeil(false);
+      //vise den grønnbox (bekreftelse)
+      setBekreftet(true); 
+      //lukker den gamlebox (som har inputfelt)
+      setVisBoks(false);
+    } else if (response.status === 404) {
+      setErFeil(true);
+      setBoksMelding("Vi finner ingen registrert kunde med dette mobilnummeret !");
+      setVisBoks(true);
+      
+      //dette bytter rød farge på skrift hvis mobilnummer ikke finnes på database
+      
+
     }
   };
+  
+
+const handleBookingClick = () => {
+  if (selectedDate && selectedTime) {
+    setVisBoks(true); 
+  } else {
+    alert("Vennligst velg både dato og tidspunkt.");
+  }
+};
 
   return (
     //style og animasjon på title 
@@ -140,7 +168,7 @@ const Bestilling = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.6, delay: 0.6 }}
-            onClick={handleBooking}
+            onClick={handleBookingClick}
             disabled={!selectedDate || !selectedTime}
             className={`mt-12 px-10 py-4 rounded-xl text-white text-lg font-semibold tracking-wide shadow-lg transition-all duration-300
                         ${!selectedDate || !selectedTime
@@ -151,6 +179,14 @@ const Bestilling = () => {
             Bekreft bestilling
           </motion.button>
         )}
+        <RegistrerKundeBox 
+          isOpen={visBoks}               // Endret fra isModalOpen
+          onClose={() => setVisBoks(false)} // Endret fra setIsModalOpen
+          onConfirm={fullforBestilling} 
+          melding={boksMelding}
+          isError={erFeil}
+        />
+        
       </div>
     </section>
   );
