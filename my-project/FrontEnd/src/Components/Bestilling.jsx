@@ -5,6 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { ledigeTider } from '../constants';
 import BakgrunnElementer from './BakgrunnElementer';
 import RegistrerKundeBox from './RegistrerKundeBox';
+import FullRegistreringBox from './FullRegistreringbox';
 
 
 
@@ -15,11 +16,22 @@ const Bestilling = () => {
   const [visBoks, setVisBoks] = useState(false);
   const [boksMelding, setBoksMelding] = useState("Skriv inn ditt mobilnummer for å fortsette.");
   const [erFeil, setErFeil] = useState(false);
+  const [visFullRegistrering, setVisFullRegistrering] = useState(false);
 
+
+// funksjon som nullstiller komponenten slik at brukeren kan forsøke med et nytt mobilnummer
   const nullstillBoks = () => {
     setErFeil(false); 
     setBoksMelding("Skriv inn ditt mobilnummer for å fortsette.");
   };
+
+  // Funksjon som bytter mellom boksene
+const apneFullReg = () => {
+  setVisBoks(false);            // Lukk den lille sjekk-boksen
+  setVisFullRegistrering(true);  // Åpne den store registrerings-boksen
+};
+
+  
 
 
   //Database connection
@@ -182,13 +194,22 @@ const handleBookingClick = () => {
             Bekreft bestilling
           </motion.button>
         )}
+         
         <RegistrerKundeBox 
-          isOpen={visBoks}               // Endret fra isModalOpen
-          onClose={() => setVisBoks(false)} // Endret fra setIsModalOpen
+          isOpen={visBoks}               
+          onClose={() => setVisBoks(false)} 
           onConfirm={fullforBestilling} 
           onReset={nullstillBoks}
           melding={boksMelding}
           isError={erFeil}
+          onOpenFull={apneFullReg} 
+       
+        />
+          
+          <FullRegistreringBox 
+          isOpen={visFullRegistrering}
+          onClose={() => setVisFullRegistrering(false)}
+          melding="Vi fant deg ikke i systemet. Vennligst fyll ut detaljene under."
         />
         
       </div>

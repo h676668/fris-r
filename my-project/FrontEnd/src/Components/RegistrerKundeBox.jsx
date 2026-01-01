@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const RegistrerKundeBox = ({ isOpen, onClose, onConfirm , onReset,  melding , isError}) => {
+const RegistrerKundeBox = ({ isOpen, onClose, onConfirm , onReset, melding , isError , onOpenFull }) => {
   const [mobilnummer, setMobilnummer] = useState("");
   
 
@@ -67,7 +67,7 @@ const RegistrerKundeBox = ({ isOpen, onClose, onConfirm , onReset,  melding , is
             </button>
 
             <button 
-              onClick={() => window.location.href = "/registrer"}
+              onClick={onOpenFull}
               className="w-full bg-red-600 text-white font-bold py-4 rounded-xl hover:bg-red-700 transition-colors shadow-lg"
             >
               Registrer ny kunde
