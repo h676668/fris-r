@@ -25,6 +25,11 @@ public class KundeService{
                 .orElseThrow(() -> new KundeIkkeFunnetException(mobilnummer));
     }
 
+    public Kunde leggNyKunde(String mobilnummer , String navn , String epost){
+        Kunde kunde = new Kunde (mobilnummer, navn ,epost );
+        return kundeRepository.save(kunde);
+    }
+
 
 
 

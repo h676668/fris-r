@@ -20,9 +20,9 @@ public class Kunde {
 
     public Kunde() {}
 
-    public Kunde(String navn, String mobilnummer, String epost) {
-        this.navn = navn;
+    public Kunde( String mobilnummer, String navn, String epost) {
         this.mobilnummer = mobilnummer;
+        this.navn = navn;
         this.epost = epost;
     }
     
