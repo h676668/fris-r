@@ -230,7 +230,7 @@ const handleBookingClick = () => {
           <FullRegistreringBox 
           isOpen={visFullRegistrering}
           onClose={() => setVisFullRegistrering(false)}
-          melding="Vi fant deg ikke i systemet. Vennligst fyll ut detaljene under."
+          melding="Vennligst fyll ut detaljene under."
           onConfirm={lagreNyKunde}
         />
         
