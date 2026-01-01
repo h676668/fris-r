@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const RegistrerKundeBox = ({ isOpen, onClose, onConfirm , melding , isError}) => {
+const RegistrerKundeBox = ({ isOpen, onClose, onConfirm , onReset,  melding , isError}) => {
   const [mobilnummer, setMobilnummer] = useState("");
   
 
@@ -13,6 +13,13 @@ const RegistrerKundeBox = ({ isOpen, onClose, onConfirm , melding , isError}) =>
     onConfirm(mobilnummer);
     
   };
+
+  const provpånytt = () => {
+    setMobilnummer(""); // Tømmer det gamle nummeret i input-feltet
+    onReset();         // Sier til Bestilling.jsx at erFeil skal bli false
+  };
+
+
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -32,6 +39,7 @@ const RegistrerKundeBox = ({ isOpen, onClose, onConfirm , melding , isError}) =>
       
         
     {!isError ? (
+          /* Dette vises når man skal skrive inn nummer */
           <>
             <input 
               type="tel"
@@ -39,6 +47,7 @@ const RegistrerKundeBox = ({ isOpen, onClose, onConfirm , melding , isError}) =>
               onChange={(e) => setMobilnummer(e.target.value)}
               placeholder="Mobilnummer"
               className="w-full text-center text-2xl font-bold py-4 mb-8 border-b-2 border-zinc-200 focus:border-zinc-900 outline-none transition-colors"
+              autoFocus
             />
             <button 
               onClick={() => onConfirm(mobilnummer)}
@@ -48,16 +57,22 @@ const RegistrerKundeBox = ({ isOpen, onClose, onConfirm , melding , isError}) =>
             </button>
           </>
         ) : (
-          /* Vis dette når kunden IKKE finnes (isError === true) */
-          <button 
-            onClick={() => {
-              // Her resetter vi feilen i forelderen slik at input kommer tilbake
-              window.location.reload(); // Eller bedre: lag en resetFeil funksjon i props
-            }}
-            className="w-full bg-red-600 text-white font-bold py-4 rounded-xl hover:bg-red-700 transition-colors"
-          >
-            Prøv på nytt
-          </button>
+          /* Dette vises når kunden IKKE finnes (isError === true) */
+          <div className="flex flex-col gap-3">
+            <button 
+              onClick={provpånytt} // Bruker funksjonen over
+              className="w-full bg-zinc-800 text-white font-bold py-4 rounded-xl hover:bg-zinc-900 transition-colors"
+            >
+              Prøv på nytt
+            </button>
+
+            <button 
+              onClick={() => window.location.href = "/registrer"}
+              className="w-full bg-red-600 text-white font-bold py-4 rounded-xl hover:bg-red-700 transition-colors shadow-lg"
+            >
+              Registrer ny kunde
+            </button>
+          </div>
         )}
       </div>
     </div>

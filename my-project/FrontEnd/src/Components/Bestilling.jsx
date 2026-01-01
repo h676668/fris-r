@@ -16,7 +16,10 @@ const Bestilling = () => {
   const [boksMelding, setBoksMelding] = useState("Skriv inn ditt mobilnummer for å fortsette.");
   const [erFeil, setErFeil] = useState(false);
 
-
+  const nullstillBoks = () => {
+    setErFeil(false); 
+    setBoksMelding("Skriv inn ditt mobilnummer for å fortsette.");
+  };
 
 
   //Database connection
@@ -183,6 +186,7 @@ const handleBookingClick = () => {
           isOpen={visBoks}               // Endret fra isModalOpen
           onClose={() => setVisBoks(false)} // Endret fra setIsModalOpen
           onConfirm={fullforBestilling} 
+          onReset={nullstillBoks}
           melding={boksMelding}
           isError={erFeil}
         />
