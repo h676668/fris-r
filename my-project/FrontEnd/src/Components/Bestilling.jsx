@@ -51,10 +51,31 @@ const apneFullReg = () => {
       setErFeil(true);
       setBoksMelding("Vi finner ingen registrert kunde med dette mobilnummeret !");
       setVisBoks(true);
-      
-      //dette bytter rød farge på skrift hvis mobilnummer ikke finnes på database
-      
 
+    }
+  };
+
+  //databaseconnection (leggnykunde)
+  const lagreNyKunde = async (kundeData) => {
+    try {
+      const response = await fetch("http://localhost:8080/kunder", { // Sjekk at URL stemmer med Java
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(kundeData), // Sender {navn, mobilnummer, epost}
+      });
+  
+      if (response.ok) {
+        console.log("Kunde lagret!");
+        setVisFullRegistrering(false); // Lukker boksen
+        setBekreftet(true);            // Viser den grønne bekreftelsen
+      } else {
+        alert("Noe gikk galt ved lagring. Prøv igjen.");
+      }
+    } catch (error) {
+      console.error("Feil:", error);
+      alert("Kunne ikke kontakte serveren.");
     }
   };
   
@@ -210,6 +231,7 @@ const handleBookingClick = () => {
           isOpen={visFullRegistrering}
           onClose={() => setVisFullRegistrering(false)}
           melding="Vi fant deg ikke i systemet. Vennligst fyll ut detaljene under."
+          onConfirm={lagreNyKunde}
         />
         
       </div>
