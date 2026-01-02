@@ -1,22 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
+
 
 const RegistrerKundeBox = ({ isOpen, onClose, onConfirm , onReset, melding , isError , onOpenFull }) => {
   const [mobilnummer, setMobilnummer] = useState("");
   
 
 
+  useEffect(() => {
+    if (isOpen && !isError) {
+      setMobilnummer("");
+    }
+  }, [isOpen, isError]);
+
   if (!isOpen) return null;
 
-  const handleConfirm = () => {
-    // Her sender vi nummeret tilbake til funksjonen som lagrer i databasen
-    //Dette er den grønnebox hvis kunden eksitere i database
-    onConfirm(mobilnummer);
-    
-  };
-
   const provpånytt = () => {
-    setMobilnummer(""); // Tømmer det gamle nummeret i input-feltet
-    onReset();         // Sier til Bestilling.jsx at erFeil skal bli false
+    setMobilnummer(""); 
+    onReset();         
   };
 
 

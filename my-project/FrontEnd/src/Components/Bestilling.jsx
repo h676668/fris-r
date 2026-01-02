@@ -75,8 +75,11 @@ const Bestilling = () => {
         body: JSON.stringify(kundeData),
       });
       if (response.ok) {
+        nullstillBoks(); 
+        setBoksMelding("Konto opprettet! Skriv inn mobilnummeret for å bekrefte.");
         setVisFullRegistrering(false);
-        setBekreftet(true);            
+        setVisBoks(true);
+                 
       }
     } catch (error) {
       console.error("Feil:", error);
