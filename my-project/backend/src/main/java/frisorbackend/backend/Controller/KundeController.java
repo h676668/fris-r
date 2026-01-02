@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
-public class Controller {
+public class KundeController {
 
        @Autowired
     private KundeService KundeService;
