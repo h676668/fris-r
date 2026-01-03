@@ -9,21 +9,20 @@ except ImportError:
     from AIModel import AIModel
 
 app = Flask(__name__)
-CORS(app)  # Tillater at React snakker med Python-serveren
+CORS(app)  # Tillater kommunikasjon mellom React og Python
 
 # --- INITIALISERING (Nøyaktig som din main) ---
 ds = Data()
 ai = AIModel()
 
-# Trener modellen med den nye Data-klassen (inkl. synonymer og takk)
 print("\033[92m[SYSTEM] Initialiserer AI og validerer datasett (Train/Val/Test)...\033[0m")
-data_splits = ds.get_split_data() # Datene blir delt i validation og test [2026-01-03]
+data_splits = ds.get_split_data()
 ai.train(data_splits)
 
-# Globale variabler for å holde på kontekst mellom API-kall
+# Variabel for å holde på kontekst (last_intent) mellom API-kall
 state = {"last_intent": None}
 
-# --- DINE ORIGINALE DATA ---
+# --- DINE ORIGINALE RESPONSES (INGENTING FJERNET) ---
 responses = {
     "pris": [
         "Prisene våre starter på 349,- for klassisk herreklipp. Si ifra hvis du vil se hele listen.",
@@ -73,8 +72,8 @@ responses = {
     ]
 }
 
-# --- DIN ORIGINALE LOGIKK ---
 def hent_bestillinger_fra_api(mobilnummer):
+    """Robust API-oppslag med håndtering av timeout og nettverksfeil."""
     url = f"http://localhost:8080/Bestillinger/mobil/{mobilnummer}"
     try:
         response = requests.get(url, timeout=5)
@@ -98,18 +97,19 @@ def predict():
     if not user_input:
         return jsonify({"reply": ""})
 
-    # --- SMART MOBIL-VALIDERING (Fra din main) ---
+    # --- SMART MOBIL-VALIDERING (Nøyaktig lik din main) ---
     kun_tall = "".join(filter(str.isdigit, user_input))
     
     if 4 <= len(kun_tall) <= 12:
         if len(kun_tall) == 8:
+            print(f"\033[93m[SYSTEM] Sjekker database for {kun_tall}...\033[0m")
             res_data, status = hent_bestillinger_fra_api(kun_tall)
             
             if status == "suksess":
-                res_text = "Jeg fant dine reservasjoner:\n"
+                reply_text = "Jeg fant dine reservasjoner:\n"
                 for b in res_data:
-                    res_text += f"📅 Dato: {b['dato']} | ⏰ Tid: {b['tidspunkt']}\n"
-                return jsonify({"reply": res_text})
+                    reply_text += f"📅 Dato: {b['dato']} | ⏰ Tid: {b['tidspunkt']}\n"
+                return jsonify({"reply": reply_text})
             elif status == "ingen_data":
                 return jsonify({"reply": f"Jeg fant ingen aktive bestillinger på nummeret {kun_tall}."})
             elif status == "timeout_error":
@@ -119,26 +119,28 @@ def predict():
         else:
             return jsonify({"reply": f"Nummeret '{user_input}' har feil lengde. Vennligst bruk 8 siffer."})
 
-    # --- AI-KLASSIFISERING (Fra din main) ---
+    # --- AI-KLASSIFISERING (Nøyaktig lik din main) ---
     intent, confidence = ai.predict_safe(user_input)
 
     # Threshold-sjekk
     if confidence < 0.30:
         intent = "usikker"
 
-    # Kontekst-logikk (last_intent)
+    # Kontekst-logikk (Nøyaktig lik din main)
     if state["last_intent"] == "pris" and any(x in user_input.lower() for x in ["ja", "vis", "liste", "gjerne", "ok"]):
         intent = "tjenester"
 
     print(f"\033[94m[DEBUG] Intent: {intent} ({confidence*100:.1f}%)\033[0m")
     
+    # Lagre nåværende intent for neste gang (kontekst)
     state["last_intent"] = intent
     
+    # Velg svar fra de samme listene som i main
     current_responses = responses.get(intent, responses["usikker"])
-    reply = random.choice(current_responses)
+    final_reply = random.choice(current_responses)
     
     return jsonify({
-        "reply": reply,
+        "reply": final_reply,
         "intent": intent,
         "confidence": float(confidence)
     })

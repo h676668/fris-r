@@ -6,6 +6,7 @@ import Contact from './Components/Contact';
 import OmOss from './Components/OmOss';
 import Tjenester from './Components/Tjenester';
 import Bestilling from './Components/Bestilling';
+import ChatBot from './Components/ChatBot';
 
 function App() {
   const [showModal, setShowModal] = useState(false);
@@ -29,6 +30,7 @@ function App() {
         <Tjenester />
         <OmOss />
         <Contact />
+        <ChatBot />
       </main>
 
       {/* --- MODAL LOGIKK --- */}
