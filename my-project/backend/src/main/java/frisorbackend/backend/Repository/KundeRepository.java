@@ -18,4 +18,5 @@ public interface KundeRepository extends JpaRepository<Kunde, String> {
     List<Kunde> findByNavnContaining(String delAvNavn);
 
     List<Kunde> findByMobilnummer(String mobilnummer);
+    
 }

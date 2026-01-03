@@ -23,5 +23,11 @@ public class BestillingService {
         return bestillingRepository.findByDato(dato);
         
     }
-    
+
+    public Bestilling lagNyBestilling(Bestilling nybestilling){
+       return bestillingRepository.save(nybestilling);
+    }
+    public List<Bestilling> hentBestillingerByMobilnummer(String mobilnummer) {
+        return bestillingRepository.findByKunde_Mobilnummer(mobilnummer);
+    }
 }
