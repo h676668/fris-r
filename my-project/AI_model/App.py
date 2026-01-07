@@ -40,7 +40,7 @@ print("🚀 Serveren er klar!")
 
 # --- SALONGDATA ---
 SALONG_INFO = {
-    "navn": "Bergen Frisør-Bot",
+    "navn": "Bergen Frisør",
     "adresse": "Lille Lungegårdsvannet 1",
     "aapningstider": "09:00 - 20:00 hver dag",
     "tjenester": {
