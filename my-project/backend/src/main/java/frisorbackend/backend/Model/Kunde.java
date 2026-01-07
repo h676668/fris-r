@@ -14,7 +14,7 @@ public class Kunde {
     private String navn;
  
     
-    @Column(name = "Epost")
+    @Column(name = "Epost", unique = true, nullable = false)
     private String epost;
     
 

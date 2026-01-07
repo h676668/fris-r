@@ -12,7 +12,6 @@ const FullRegistreringBox = ({ isOpen, onClose, onConfirm, melding }) => {
 
   if (!isOpen) return null;
 
-  // STEG 1: Send koden til e-post
   const handleSubmitInfo = async (e) => {
     e.preventDefault();
     setFeilmelding("");
@@ -20,7 +19,7 @@ const FullRegistreringBox = ({ isOpen, onClose, onConfirm, melding }) => {
     const renEpost = epost.trim().toLowerCase();
     const renMobil = mobilnummer.replace(/\s/g, "");
 
-    // Enkel frontend-validering
+    // Frontend-validering
     if (navn.trim().length < 2) return setFeilmelding("Vennligst oppgi fullt navn.");
     if (!/^\d{8}$/.test(renMobil)) return setFeilmelding("Mobilnummer må være 8 siffer.");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(renEpost)) return setFeilmelding("Ugyldig e-postadresse.");
@@ -30,16 +29,19 @@ const FullRegistreringBox = ({ isOpen, onClose, onConfirm, melding }) => {
       const response = await fetch('http://localhost:8080/api/auth/send-kode', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ epost: renEpost }),
+        // VIKTIG: Vi sender nå både epost og mobilnummer slik at backenden kan sjekke begge
+        body: JSON.stringify({ 
+          epost: renEpost, 
+          mobilnummer: renMobil 
+        }),
       });
 
-      // Vi henter ut JSON uansett statuskode for å få tak i feilmeldinger fra Java
       const data = await response.json();
 
       if (response.ok) {
         setVisVerifisering(true);
       } else {
-        // Her viser vi meldingen fra backenden (f.eks. "E-posten er allerede i bruk")
+        // Viser spesifikk feilmelding fra Java (f.eks. "Mobilnummeret er allerede registrert")
         setFeilmelding(data.message || "Kunne ikke sende verifiseringskode.");
       }
     } catch (err) {
@@ -49,7 +51,7 @@ const FullRegistreringBox = ({ isOpen, onClose, onConfirm, melding }) => {
     }
   };
 
-  // STEG 2: Sjekk koden og fullfør registrering
+  // STEG 2: Verifiser koden
   const handleSubmitKode = async (e) => {
     e.preventDefault();
     setFeilmelding("");
@@ -71,7 +73,7 @@ const FullRegistreringBox = ({ isOpen, onClose, onConfirm, melding }) => {
       const data = await response.json();
 
       if (response.ok) {
-        // Suksess: Kall onConfirm for å lagre kunden i databasen
+        // Sender all info tilbake til Bestilling.js for lagring
         onConfirm({ navn, mobilnummer, epost: renEpost });
       } else {
         setFeilmelding(data.message || "Feil eller utløpt kode.");
@@ -96,7 +98,7 @@ const FullRegistreringBox = ({ isOpen, onClose, onConfirm, melding }) => {
         </p>
 
         {feilmelding && (
-          <p className="text-red-600 text-xs mb-4 font-bold bg-red-50 p-3 rounded-xl border border-red-100">
+          <p className="text-red-600 text-xs mb-4 font-bold bg-red-50 p-3 rounded-xl border border-red-100 animate-shake">
             {feilmelding}
           </p>
         )}
@@ -113,7 +115,7 @@ const FullRegistreringBox = ({ isOpen, onClose, onConfirm, melding }) => {
                 disabled={!navn || !mobilnummer || !epost || laster}
                 className={`w-full font-bold py-4 rounded-xl shadow-lg mt-4 transition-all ${(!navn || !mobilnummer || !epost || laster) ? 'bg-zinc-200 text-zinc-400' : 'bg-red-700 text-white hover:bg-red-800'}`}
               >
-                {laster ? "Sender..." : "Send verifiseringskode"}
+                {laster ? "Sjekker..." : "Send verifiseringskode"}
               </button>
             </form>
           ) : (

@@ -4,6 +4,7 @@ import frisorbackend.backend.Service.BestillingService;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -45,19 +46,17 @@ public class BestillingController{
     return ResponseEntity.ok(bestillinger);
 }
     
-     @PostMapping("/Bestillinger")
-     public ResponseEntity<Bestilling> opprettBestilling(@RequestBody Bestilling nyBestilling) {
-        try {
-            // Lagrer bestillingen i databasen
-            Bestilling lagretBestilling = BestillingService.lagNyBestilling(nyBestilling);
-            
-            // Returnerer den lagrede bestillingen med HTTP 201 Created
-            return new ResponseEntity<>(lagretBestilling, HttpStatus.CREATED);
-        } catch (Exception e) {
-            // Returnerer feilmelding hvis noe går galt
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+@PostMapping("/Bestillinger")
+public ResponseEntity<?> opprettBestilling(@RequestBody Bestilling nyBestilling) {
+    try {
+        Bestilling lagret = BestillingService.lagNyBestilling(nyBestilling);
+        return new ResponseEntity<>(lagret, HttpStatus.CREATED);
+    } catch (Exception e) {
+        // Returner feilmeldingen slik at frontend kan vise den
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                             .body(Map.of("message", e.getMessage()));
     }
+}
 
     }
     

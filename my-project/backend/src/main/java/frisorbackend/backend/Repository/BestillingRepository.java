@@ -22,4 +22,6 @@ public interface BestillingRepository extends JpaRepository<Bestilling, Long> {
     boolean existsByDatoAndTidspunkt(LocalDate dato, String tidspunkt);
 
     List<Bestilling> findByKunde_Mobilnummer(String mobilnummer);
+
+    List<Bestilling> findByKundeMobilnummerAndDatoBetween(String mobilnummer, LocalDate start, LocalDate slutt);
 }
