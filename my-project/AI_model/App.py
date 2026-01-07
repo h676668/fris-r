@@ -1,79 +1,40 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import random
+from openai import OpenAI
 import requests
 from Data import Data
-try:
-    from AiModel import AIModel
-except ImportError:
-    from AIModel import AIModel
+from AiModel import AIModel
 
 app = Flask(__name__)
-CORS(app)  # Tillater kommunikasjon mellom React og Python
+CORS(app)
 
-# --- INITIALISERING (Nøyaktig som din main) ---
+# --- KONFIGURASJON ---
+# Bruker din eksisterende nøkkel og oppsett
+HF_TOKEN = "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"
+client = OpenAI(base_url="https://router.huggingface.co/v1", api_key=HF_TOKEN)
+
+# Initialisering av dine klasser
 ds = Data()
 ai = AIModel()
-
-print("\033[92m[SYSTEM] Initialiserer AI og validerer datasett (Train/Val/Test)...\033[0m")
-data_splits = ds.get_split_data()
+# Bruker din spesifiserte data-split fra [2026-01-03]
+data_splits = ds.get_split_data() 
 ai.train(data_splits)
 
-# Variabel for å holde på kontekst (last_intent) mellom API-kall
-state = {"last_intent": None}
-
-# --- DINE ORIGINALE RESPONSES (INGENTING FJERNET) ---
-responses = {
-    "pris": [
-        "Prisene våre starter på 349,- for klassisk herreklipp. Si ifra hvis du vil se hele listen.",
-        "En standard klipp ligger på 349,- hos oss.",
-        "Vi har priser fra 349 kr for klipp og 249 kr for skjeggtrim."
-    ],
-    "tjenester": [
-        "\n--- TJENESTEMENY ---\n01. Klassisk Klipp ....... fra 349,-\n02. Hårvask & Kur ........ fra 199,-\n03. Barbering & Fade ..... fra 399,-\n04. Skjeggtrim ........... fra 249,-\n",
-        "\nHer er våre behandlinger:\n✂️ Klassisk Klipp: 349,-\n🧼 Hårvask & Kur: 199,-\n🪒 Barbering & Fade: 399,-\n🧔 Skjeggtrim: 249,-\n"
-    ],
-    "lokasjon": [
-        "Vi holder til i Storgata 15.",
-        "Adressen vår er Storgata 15. Velkommen!",
-        "Du finner oss i Storgata 15, midt i sentrum."
-    ],
-    "aapningstider": [
-        "Vi er åpent hver dag fra 09:00 til 20:00.",
-        "Våre åpningstider er 09:00 - 20:00 alle dager.",
-        "Vi holder åpent til kl. 20:00 på hverdager."
-    ],
-    "hilsen": [
-        "Hei! Hvordan kan jeg hjelpe deg i dag? 😊",
-        "Heisann! Hva lurer du på?",
-        "God dag. Hva kan jeg bistå med?"
-    ],
-    "paaminnelse": [
-        "Selvfølgelig! Vennligst oppgi ditt 8-sifrede mobilnummer, så sjekker jeg systemet med en gang.",
-        "Det kan jeg sjekke for deg. Hvilket mobilnummer er bestillingen registrert på?",
-        "For å finne dine reservasjoner trenger jeg mobilnummeret ditt (8 siffer).",
-        "Ikke noe problem! Skriv inn mobilnummeret ditt her, så henter jeg opp avtalene dine.",
-        "Jeg hjelper deg gjerne med det. Kan jeg få mobilnummeret ditt for å slå opp i kalenderen?"
-    ],
-    "takk": [
-        "Bare hyggelig! Si ifra hvis du trenger noe mer. 😊",
-        "Ingen årsak, hyggelig å hjelpe!",
-        "Det var bare hyggelig! Ha en fin dag videre.",
-        "Bare hyggelig!"
-    ],
-    "annet": [
-        "Den er god.",
-        "Skjønner. Jeg er her hvis du trenger mer hjelp senere.",
-        "Den er grei."
-    ],
-    "usikker": [
-        "Beklager, jeg forsto ikke helt. Kan du prøve å skrive det på en annen måte? 🤔",
-        "Jeg er litt usikker på hva du mener. Gjelder det pris, tid eller sted?"
-    ]
+# --- INFORMASJON BASERT PÅ DINE BILDER OG KRAV ---
+SALONG_INFO = {
+    "navn": "Bergen Frisør-Bot",
+    "adresse": "Lille Lungegårdsvannet 1",
+    "aapningstider": "09:00 - 20:00 hver dag",
+    "tjenester": {
+        "Klassisk Klipp": "fra 349,- (Skreddersydd klipp som passer din ansiktsform og stil)",
+        "Hårvask & Kur": "fra 199,- (Dyperens og pleie for hodebunn og hår med premium produkter)",
+        "Barbering & Fade": "fra 399,- (Presisjonsarbeid med kniv og maskin for den perfekte looken)",
+        "Skjeggtrim": "fra 249,- (Forming og pleie av skjegg for en velstelt fremtoning)"
+    }
 }
 
 def hent_bestillinger_fra_api(mobilnummer):
-    """Robust API-oppslag med håndtering av timeout og nettverksfeil."""
+    """Kobling mot din Java-backend for å finne faktiske reservasjoner."""
     url = f"http://localhost:8080/Bestillinger/mobil/{mobilnummer}"
     try:
         response = requests.get(url, timeout=5)
@@ -81,72 +42,87 @@ def hent_bestillinger_fra_api(mobilnummer):
             return response.json(), "suksess"
         elif response.status_code == 204:
             return None, "ingen_data"
-        else:
-            return None, "feil"
-    except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectError):
-        return None, "timeout_error"
+        return None, "feil"
     except Exception:
-        return None, "ukjent_feil"
+        return None, "connection_error"
 
-# --- API ENDEPUNKT FOR REACT ---
+def hent_smart_svar(user_input, intent):
+    """Genererer svar via AI med strenge instrukser mot gjetting/booking."""
+    tjeneste_tekst = "\n".join([f"- {k}: {v}" for k, v in SALONG_INFO['tjenester'].items()])
+    
+    system_instruks = f"""
+    Du er en informasjonsassistent for {SALONG_INFO['navn']}.
+    
+    STRENGE REGLER:
+    1. Du kan ALDRI booke, avbestille eller endre timer. Henvis til telefon eller nettside.
+    2. Du vet ALDRI når en kunde har time uten at de har oppgitt et 8-sifret nummer.
+    3. Du må ALDRI gjette på datoer eller klokkeslett for reservasjoner. 
+    4. Hvis kunden spør om sin time uten nummer, svar: "Jeg trenger mobilnummeret ditt (8 siffer) for å sjekke systemet."
+
+    DIN KUNNSKAP (Tjenester fra bilde):
+    {tjeneste_tekst}
+    
+    ANDRE FAKTA:
+    - Adresse: {SALONG_INFO['adresse']}
+    - Åpningstider: {SALONG_INFO['aapningstider']}
+    """
+
+    try:
+        completion = client.chat.completions.create(
+            model="Qwen/Qwen2.5-72B-Instruct",
+            messages=[
+                {"role": "system", "content": system_instruks},
+                {"role": "user", "content": user_input}
+            ],
+            max_tokens=200,
+            temperature=0.3 # Lav temperatur for å redusere "kreativ" gjetting
+        )
+        return completion.choices[0].message.content
+    except Exception:
+        return "Jeg kan dessverre ikke sjekke dette akkurat nå. Vennligst oppgi mobilnummer for å se dine timer."
+
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json
     user_input = data.get("text", "").strip()
     
     if not user_input:
-        return jsonify({"reply": ""})
+        return jsonify({"reply": "Hei! Hvordan kan jeg hjelpe deg?"})
 
-    # --- SMART MOBIL-VALIDERING (Nøyaktig lik din main) ---
+    # 1. SPERRE FOR BOOKING / AVBESTILLING
+    nei_ord = ["booke", "bestille", "reserve", "avbestille", "kansellere", "endre time", "flytte time"]
+    if any(ord in user_input.lower() for ord in nei_ord):
+        return jsonify({
+            "reply": "Jeg kan dessverre ikke booke eller endre timer her i chatten. Vennligst ring oss eller bruk vår online booking. Jeg kan derimot vise deg dine eksisterende timer hvis du skriver inn mobilnummeret ditt!",
+            "intent": "begrensning"
+        })
+
+    # 2. DATABASE-OPPSLAG (Hvis bruker skriver 8 siffer)
     kun_tall = "".join(filter(str.isdigit, user_input))
-    
-    if 4 <= len(kun_tall) <= 12:
-        if len(kun_tall) == 8:
-            print(f"\033[93m[SYSTEM] Sjekker database for {kun_tall}...\033[0m")
-            res_data, status = hent_bestillinger_fra_api(kun_tall)
-            
-            if status == "suksess":
-                reply_text = "Jeg fant dine reservasjoner:\n"
-                for b in res_data:
-                    reply_text += f"📅 Dato: {b['dato']} | ⏰ Tid: {b['tidspunkt']}\n"
-                return jsonify({"reply": reply_text})
-            elif status == "ingen_data":
-                return jsonify({"reply": f"Jeg fant ingen aktive bestillinger på nummeret {kun_tall}."})
-            elif status == "timeout_error":
-                return jsonify({"reply": "Systemet bruker for lang tid på å svare. Prøv igjen om et øyeblikk."})
-            else:
-                return jsonify({"reply": "Kunne ikke koble til serveren. Sjekk at Java-backenden kjører."})
+    if len(kun_tall) == 8:
+        res_data, status = hent_bestillinger_fra_api(kun_tall)
+        
+        if status == "suksess":
+            reply_text = f"Jeg fant følgende reservasjoner på nummer {kun_tall}:\n"
+            for b in res_data:
+                reply_text += f"📅 Dato: {b['dato']} | ⏰ Tid: {b['tidspunkt']}\n"
+            reply_text += "\nVelkommen skal du være!"
+            return jsonify({"reply": reply_text})
+        elif status == "ingen_data":
+            return jsonify({"reply": f"Jeg fant ingen aktive reservasjoner på nummeret {kun_tall}."})
         else:
-            return jsonify({"reply": f"Nummeret '{user_input}' har feil lengde. Vennligst bruk 8 siffer."})
+            return jsonify({"reply": "Systemet mitt for å hente timer er nede akkurat nå, men prøv igjen om litt!"})
 
-    # --- AI-KLASSIFISERING (Nøyaktig lik din main) ---
+    # 3. GENERELT SVAR (Info om priser/tjenester via AI)
     intent, confidence = ai.predict_safe(user_input)
+    reply = hent_smart_svar(user_input, intent)
 
-    # Threshold-sjekk
-    if confidence < 0.30:
-        intent = "usikker"
-
-    # Kontekst-logikk (Nøyaktig lik din main)
-    if state["last_intent"] == "pris" and any(x in user_input.lower() for x in ["ja", "vis", "liste", "gjerne", "ok"]):
-        intent = "tjenester"
-
-    print(f"\033[94m[DEBUG] Intent: {intent} ({confidence*100:.1f}%)\033[0m")
-    
-    # Lagre nåværende intent for neste gang (kontekst)
-    state["last_intent"] = intent
-    
-    # Velg svar fra de samme listene som i main
-    current_responses = responses.get(intent, responses["usikker"])
-    final_reply = random.choice(current_responses)
-    
     return jsonify({
-        "reply": final_reply,
+        "reply": reply,
         "intent": intent,
         "confidence": float(confidence)
     })
 
 if __name__ == "__main__":
-    print("\n" + "="*50)
-    print("--- FRISØR-BOT API ER KLAR ---")
-    print("="*50 + "\n")
+    # Kjører på port 5000 som standard
     app.run(port=5000, debug=True)

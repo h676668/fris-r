@@ -1,45 +1,36 @@
-import joblib
-import os
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
-from sklearn.metrics import classification_report
 
 class AIModel:
-    def __init__(self, model_file='frisor_ai_modell.pkl'):
-        self.model_file = model_file
-        self.pipeline = Pipeline([
-            ('tfidf', TfidfVectorizer(analyzer='char_wb', ngram_range=(2, 5), lowercase=True)),
-            ('clf', LogisticRegression(C=10, max_iter=1000))
-        ])
+    def __init__(self):
+        self.vectorizer = TfidfVectorizer()
+        self.model = LogisticRegression()
+        self.is_trained = False
 
-    def train(self, split_data):
-        X_train, y_train = split_data['train']['text'], split_data['train']['label']
-        X_val, y_val = split_data['val']['text'], split_data['val']['label']
-        X_test, y_test = split_data['test']['text'], split_data['test']['label']
-
-        print(f"Trener på {len(X_train)} eksempler...")
-        self.pipeline.fit(X_train, y_train)
-
-        print(f"Validerings-nøyaktighet: {self.pipeline.score(X_val, y_val) * 100:.1f}%")
-        print(f"Test-nøyaktighet: {self.pipeline.score(X_test, y_test) * 100:.1f}%")
+    def train(self, data_splits):
+        """Trener modellen på treningssettet fra Data.py"""
+        X_train = data_splits['train']['text']
+        y_train = data_splits['train']['label']
         
-        y_pred = self.pipeline.predict(X_test)
-        print("\nKlassifiseringsrapport (Test-sett):")
-        print(classification_report(y_test, y_pred))
-
-        joblib.dump(self.pipeline, self.model_file)
-        print("Modell lagret!")
-
-    def predict_safe(self, text, threshold=0.40):
-        if not os.path.exists(self.model_file):
-            return "error_no_model", 0.0
+        # Gjør tekst om til tall (vektorisering)
+        X_vectorized = self.vectorizer.fit_transform(X_train)
         
-        model = joblib.load(self.model_file)
-        probs = model.predict_proba([text])[0]
-        max_idx = np.argmax(probs)
-        max_prob = probs[max_idx]
-        label = model.classes_[max_idx]
+        # Trener den logiske regresjonsmodellen
+        self.model.fit(X_vectorized, y_train)
+        self.is_trained = True
+        print("\033[92m[AI] Trening fullført på datasettet!\033[0m")
 
-        return (label, max_prob) if max_prob >= threshold else ("usikker", max_prob)
+    def predict_safe(self, text):
+        """Forutsier kategori og gir en sikkerhetsscore (confidence)"""
+        if not self.is_trained:
+            return "usikker", 0.0
+            
+        X_vec = self.vectorizer.transform([text])
+        probabilities = self.model.predict_proba(X_vec)[0]
+        max_idx = np.argmax(probabilities)
+        
+        intent = self.model.classes_[max_idx]
+        confidence = probabilities[max_idx]
+        
+        return intent, confidence

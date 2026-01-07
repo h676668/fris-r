@@ -4,11 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // Ny state for loading
   const [messages, setMessages] = useState([
     { 
       role: 'bot', 
       text: 'Hei! Jeg er din frisør-assistent. Hvordan kan jeg hjelpe deg i dag? 😊',
-      isFirst: true // Markør for å vise infokortet
+      isFirst: true 
     }
   ]);
   
@@ -18,15 +19,16 @@ const ChatBot = () => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, isLoading]); // Scroll også når loading endres
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || isLoading) return; // Hindre sending hvis loading
 
     const userMsg = { role: 'user', text: input };
     setMessages(prev => [...prev, userMsg]);
     const textToSend = input;
     setInput("");
+    setIsLoading(true); // Start animasjon
 
     try {
       const response = await fetch('http://127.0.0.1:5000/predict', {
@@ -39,6 +41,8 @@ const ChatBot = () => {
       setMessages(prev => [...prev, { role: 'bot', text: data.reply }]);
     } catch (error) {
       setMessages(prev => [...prev, { role: 'bot', text: 'Beklager, jeg mistet kontakten med serveren. Prøv igjen senere.' }]);
+    } finally {
+      setIsLoading(false); // Stopp animasjon uansett utfall
     }
   };
 
@@ -55,7 +59,7 @@ const ChatBot = () => {
             {/* Header */}
             <div className="bg-red-800 p-4 text-white flex justify-between items-center shadow-md">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                <div className={`w-3 h-3 ${isLoading ? 'bg-yellow-400' : 'bg-green-400'} rounded-full animate-pulse`}></div>
                 <h4 className="font-bold tracking-wide">Frisør AI</h4>
               </div>
               <button onClick={() => setIsOpen(false)} className="hover:text-zinc-300 transition-colors">✕</button>
@@ -75,7 +79,6 @@ const ChatBot = () => {
                     </div>
                   </div>
 
-                  {/* Viser "Dette kan du spørre om" kun etter den aller første bot-meldingen */}
                   {msg.isFirst && (
                     <div className="bg-white border border-zinc-200 rounded-xl p-3 shadow-sm ml-2 mr-8">
                       <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">Dette kan jeg hjelpe med:</p>
@@ -89,6 +92,31 @@ const ChatBot = () => {
                   )}
                 </div>
               ))}
+
+              {/* Loading Indikator */}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-white border border-zinc-200 p-3 rounded-2xl rounded-tl-none shadow-sm">
+                    <div className="flex gap-1">
+                      <motion.span
+                        animate={{ y: [0, -5, 0] }}
+                        transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
+                        className="w-1.5 h-1.5 bg-zinc-400 rounded-full"
+                      />
+                      <motion.span
+                        animate={{ y: [0, -5, 0] }}
+                        transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
+                        className="w-1.5 h-1.5 bg-zinc-400 rounded-full"
+                      />
+                      <motion.span
+                        animate={{ y: [0, -5, 0] }}
+                        transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }}
+                        className="w-1.5 h-1.5 bg-zinc-400 rounded-full"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Inputfelt */}
@@ -98,14 +126,16 @@ const ChatBot = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="Skriv til oss..."
-                className="flex-1 bg-zinc-100 border-none rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-red-800 outline-none transition-all"
+                placeholder={isLoading ? "Venter på svar..." : "Skriv til oss..."}
+                disabled={isLoading}
+                className="flex-1 bg-zinc-100 border-none rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-red-800 outline-none transition-all disabled:opacity-50"
               />
               <button 
                 onClick={handleSend}
-                className="bg-red-800 text-white p-2 rounded-xl hover:bg-red-900 transition-colors shadow-md"
+                disabled={isLoading}
+                className="bg-red-800 text-white p-2 rounded-xl hover:bg-red-900 transition-colors shadow-md disabled:bg-zinc-400"
               >
-                ➤
+                {isLoading ? '...' : '➤'}
               </button>
             </div>
           </motion.div>
