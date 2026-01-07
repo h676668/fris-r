@@ -1,6 +1,7 @@
 package frisorbackend.backend.Controller;
 import frisorbackend.backend.Model.Bestilling;
 import frisorbackend.backend.Service.BestillingService;
+import jakarta.validation.Valid;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -47,16 +48,17 @@ public class BestillingController{
 }
     
 @PostMapping("/Bestillinger")
-public ResponseEntity<?> opprettBestilling(@RequestBody Bestilling nyBestilling) {
+public ResponseEntity<?> opprettBestilling(@Valid @RequestBody Bestilling nyBestilling) {
+    // Hvis valideringen feiler, vil Spring automatisk returnere 400 Bad Request
     try {
         Bestilling lagret = BestillingService.lagNyBestilling(nyBestilling);
         return new ResponseEntity<>(lagret, HttpStatus.CREATED);
     } catch (Exception e) {
-        // Returner feilmeldingen slik at frontend kan vise den
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                              .body(Map.of("message", e.getMessage()));
     }
 }
+
 
     }
     

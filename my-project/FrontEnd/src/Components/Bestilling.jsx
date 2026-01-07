@@ -24,65 +24,46 @@ const Bestilling = () => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   };
 
-
   useEffect(() => {
     if (!selectedDate) return;
     (async () => {
       setIsLoading(true);
       try {
         const res = await fetch(`http://localhost:8080/Bestillinger/${formaterDato(selectedDate)}`);
-        if (res.ok) {
-          const data = await res.json();
-          setOpptatteTider(data.map(b => b.tidspunkt));
-        } else {
-          setOpptatteTider([]);
-        }
+        const data = await res.json();
+        setOpptatteTider(res.ok ? data.map(b => b.tidspunkt) : []);
       } catch (err) { console.error(err); }
       finally { setIsLoading(false); }
     })();
   }, [selectedDate]);
 
-
   const fullforBestilling = async (mobilnummer) => {
     setErFeil(false);
-    setIsLoading(true);
-
     try {
-
-      const kundeRes = await fetch(`http://localhost:8080/kunder/${mobilnummer}`);
-      if (!kundeRes.ok) {
-        setErFeil(true);
-        setBoksMelding("Vi finner ingen registrert kunde med dette mobilnummeret!");
-        setIsLoading(false);
-        return;
-      }
-
-   
-      const saveRes = await fetch("http://localhost:8080/Bestillinger", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          dato: formaterDato(selectedDate), 
-          tidspunkt: selectedTime, 
-          kunde: { mobilnummer } 
-        }),
-      });
-
-      const data = await saveRes.json();
-
-      if (saveRes.ok) {
-        setBekreftet(true);
-        setVisBoks(false);
+      const res = await fetch(`http://localhost:8080/kunder/${mobilnummer}`);
+      if (res.ok) {
+        const saveRes = await fetch("http://localhost:8080/Bestillinger", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ dato: formaterDato(selectedDate), tidspunkt: selectedTime, kunde: { mobilnummer } }),
+        });
+        
+        const data = await saveRes.json();
+        
+        if (saveRes.ok) {
+          setBekreftet(true);
+          setVisBoks(false);
+        } else {
+          setErFeil(true);
+          setBoksMelding(data.message || "Kunne ikke fullføre bestilling.");
+        }
       } else {
-       
         setErFeil(true);
-        setBoksMelding(data.message || "Kunne ikke fullføre bestillingen.");
+        setBoksMelding("Vi finner ingen registrert kunde med dette mobilnummeret !");
       }
     } catch (err) {
       setErFeil(true);
       setBoksMelding("Nettverksfeil: Kunne ikke kontakte serveren.");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -103,23 +84,34 @@ const Bestilling = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
             className="bg-green-100 border-l-4 border-green-500 text-green-700 p-6 rounded-lg shadow-lg max-w-md mx-auto"
           >
             <h4 className="text-2xl font-bold mb-3">Time bekreftet!</h4>
-            <p className="text-xl font-semibold">
-                {selectedDate.toLocaleDateString('nb-NO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} kl. {selectedTime}
-            </p>
+            <p className="text-xl font-semibold">{selectedDate.toLocaleDateString('nb-NO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} kl. {selectedTime}</p>
             <button onClick={() => setBekreftet(false)} className="mt-6 px-6 py-2 bg-green-600 text-white rounded-lg">Bestill ny time</button>
           </motion.div>
         ) : (
           <div className="flex flex-col lg:flex-row items-center justify-center gap-12">
-            <motion.div className="bg-white p-6 rounded-2xl shadow-xl border border-zinc-200 relative z-10 w-full max-w-sm">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+              className="bg-white p-6 rounded-2xl shadow-xl border border-zinc-200 relative z-10 w-full max-w-sm"
+            >
               <BakgrunnElementer position='-top-6 -left-6' size='text-3xl'/>
               <h4 className="text-xl font-bold mb-4 text-left">Velg Dato</h4>
               <DatePicker selected={selectedDate} onChange={(d) => { setOpptatteTider([]); setSelectedDate(d); setSelectedTime(null); }} inline minDate={new Date()} />
             </motion.div>
 
-            <motion.div className={`bg-white p-6 rounded-2xl shadow-xl border border-zinc-200 relative z-10 w-full max-w-sm ${selectedDate ? 'border-red-600' : ''}`}>
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.7, delay: 0.4 }}
+              className={`bg-white p-6 rounded-2xl shadow-xl border border-zinc-200 relative z-10 w-full max-w-sm ${selectedDate ? 'border-red-600' : ''}`}
+            >
               <BakgrunnElementer position='-bottom-6 -right-6' size='text-3xl'/>
               <h4 className="text-xl font-bold mb-4 text-left">Velg Tidspunkt</h4>
               <div className="grid grid-cols-3 gap-3">
@@ -142,6 +134,10 @@ const Bestilling = () => {
 
         {!bekreftet && (
           <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
             onClick={() => setVisValgBoks(true)}
             disabled={!selectedDate || !selectedTime}
             className={`mt-12 px-10 py-4 rounded-xl text-white text-lg font-semibold shadow-lg transition-all duration-300
@@ -151,57 +147,62 @@ const Bestilling = () => {
           </motion.button>
         )}
 
-        {/* MELLOMVALG-BOKS */}
         <AnimatePresence>
           {visValgBoks && (
             <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setVisValgBoks(false)} />
-              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-white rounded-3xl p-8 md:p-10 shadow-2xl z-10 max-w-sm w-full text-center">
+              <motion.div 
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
+                onClick={() => setVisValgBoks(false)}
+              />
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
+                className="bg-white rounded-3xl p-8 md:p-10 shadow-2xl z-10 max-w-sm w-full text-center"
+              >
                 <h3 className="text-2xl font-black text-zinc-900 mb-6">Velkommen</h3>
                 <div className="flex flex-col gap-4">
-                  <button onClick={() => { setVisValgBoks(false); setVisBoks(true); }} className="w-full bg-zinc-900 text-white font-bold py-4 rounded-xl hover:bg-black transition-all">Jeg har en profil</button>
-                  <button onClick={() => { setVisValgBoks(false); setVisFullRegistrering(true); }} className="w-full border-2 border-zinc-200 text-zinc-900 font-bold py-4 rounded-xl hover:bg-zinc-50 transition-all">Opprett ny profil</button>
-                  <button onClick={() => setVisValgBoks(false)} className="text-zinc-400 text-sm mt-2">Avbryt</button>
+                  <button 
+                    onClick={() => { setVisValgBoks(false); setVisBoks(true); }}
+                    className="w-full bg-zinc-900 text-white font-bold py-4 rounded-xl hover:bg-black transition-all"
+                  >
+                    Jeg har en profil
+                  </button>
+                  <button 
+                    onClick={() => { setVisValgBoks(false); setVisFullRegistrering(true); }}
+                    className="w-full border-2 border-zinc-200 text-zinc-900 font-bold py-4 rounded-xl hover:bg-zinc-50 transition-all"
+                  >
+                    Opprett ny profil
+                  </button>
+                  <button onClick={() => setVisValgBoks(false)} className="text-zinc-400 text-sm mt-2">
+                    Avbryt
+                  </button>
                 </div>
               </motion.div>
             </div>
           )}
         </AnimatePresence>
 
-        {/* LOGGINN-BOKS (MOBILNUMMER) */}
         <RegistrerKundeBox 
-          isOpen={visBoks} 
-          onClose={() => setVisBoks(false)} 
-          onConfirm={fullforBestilling} 
-          onReset={() => {setErFeil(false); setBoksMelding("Skriv inn ditt mobilnummer for å fortsette.");}}
-          melding={boksMelding} 
-          isError={erFeil} 
-          onOpenFull={() => {setVisBoks(false); setVisFullRegistrering(true);}} 
+          isOpen={visBoks} onClose={() => setVisBoks(false)} 
+          onConfirm={fullforBestilling} onReset={() => {setErFeil(false); setBoksMelding("Skriv inn ditt mobilnummer for å fortsette.");}}
+          melding={boksMelding} isError={erFeil} onOpenFull={() => {setVisBoks(false); setVisFullRegistrering(true);}} 
         />
 
-        {/* REGISTRERINGS-BOKS */}
         <FullRegistreringBox 
           isOpen={visFullRegistrering} 
           onClose={() => setVisFullRegistrering(false)} 
           onConfirm={async (data) => {
-            try {
-              const res = await fetch("http://localhost:8080/kunder", { 
-                  method: "POST", 
-                  headers: { "Content-Type": "application/json" }, 
-                  body: JSON.stringify(data) 
-              });
+            const res = await fetch("http://localhost:8080/kunder", { 
+                method: "POST", 
+                headers: { "Content-Type": "application/json" }, 
+                body: JSON.stringify(data) 
+            });
 
-              if (res.ok) { 
-                setVisFullRegistrering(false); 
-                setErFeil(false); 
-                setBoksMelding("Konto opprettet! Vennligst skriv nummeret ditt."); 
-                setVisBoks(true); 
-              } else {
-                const errorData = await res.json();
-                alert(errorData.message || "E-post eller mobilnummer er allerede i bruk.");
-              }
-            } catch (err) {
-              alert("Kunne ikke koble til serveren.");
+            if (res.ok) { 
+              setVisFullRegistrering(false); 
+              setErFeil(false); // SIKRER SVART SKRIFT
+              setBoksMelding("Konto opprettet! Vennligst skriv nummeret på nytt."); 
+              setVisBoks(true); 
             }
           }} 
         />
