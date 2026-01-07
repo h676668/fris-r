@@ -23,22 +23,21 @@ if not HF_TOKEN:
 else:
     print(f"✅ Token lastet inn (starter med: {HF_TOKEN[:5]}...)")
 
-# Oppsett av OpenAI-klient mot Hugging Face Router
+
 client = OpenAI(base_url="https://router.huggingface.co/v1", api_key=HF_TOKEN)
 
-# --- INITIALISERING AV MODELL ---
+
 ds = Data()
 ai = AIModel()
 
 print("🔄 Laster og splitter data (Training, Validation, Test)...")
-# Her brukes din logikk for splitting av data i validation og test [2026-01-03]
+
 data_splits = ds.get_split_data()
 
 print("🧠 Trener lokal AI-modell...")
 ai.train(data_splits)
 print("🚀 Serveren er klar!")
 
-# --- SALONGDATA ---
 SALONG_INFO = {
     "navn": "Bergen Frisør",
     "adresse": "Lille Lungegårdsvannet 1",
@@ -51,7 +50,7 @@ SALONG_INFO = {
     }
 }
 
-# --- HJELPEFUNKSJONER ---
+
 
 def hent_bestillinger_fra_api(mobilnummer):
     """Kobler seg mot Java-backend for å hente reservasjoner."""
@@ -96,10 +95,10 @@ def hent_smart_svar(user_input, intent):
         return completion.choices[0].message.content
     except Exception as e:
         print(f"AI-feil: {e}")
-        # HER ER FEILEN RETTET (bruker enkle hermetegn inni de doble):
+      
         return "Jeg har litt problemer med å kontakte 'hovedhjernen' min, men vi tilbyr klipp fra 349,-. Hva kan jeg hjelpe med?"
 
-# --- API ENDEPUNKTER ---
+
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -109,14 +108,14 @@ def predict():
     if not user_input:
         return jsonify({"reply": "Hei! Hva kan jeg hjelpe deg med i dag?"})
 
-    # 1. Sperre for booking-handlinger
+   
     nei_ord = ["booke", "bestille", "reserve", "avbestille", "kansellere", "endre"]
     if any(ord in user_input.lower() for ord in nei_ord):
         return jsonify({
             "reply": "Jeg kan dessverre ikke endre eller booke timer her. Vennligst ring oss, så hjelper vi deg gjerne over telefon!"
         })
 
-    # 2. Sjekk for mobilnummer (8 siffer)
+ 
     kun_tall = "".join(filter(str.isdigit, user_input))
     if len(kun_tall) == 8:
         res_data, status = hent_bestillinger_fra_api(kun_tall)
@@ -129,7 +128,6 @@ def predict():
         else:
             return jsonify({"reply": "Beklager, jeg får ikke kontakt med bookingsystemet akkurat nå."})
 
-    # 3. Generelt svar via lokal intent-modell og ekstern AI
     intent, confidence = ai.predict_safe(user_input)
     reply = hent_smart_svar(user_input, intent)
 

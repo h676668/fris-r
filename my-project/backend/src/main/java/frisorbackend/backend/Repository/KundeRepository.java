@@ -14,7 +14,9 @@ public interface KundeRepository extends JpaRepository<Kunde, String> {
     List<Kunde> findByNavn(String navn);
     
     List<Kunde> findByEpost(String epost);
-    
+
+    boolean existsByEpost(String epost);
+
     List<Kunde> findByNavnContaining(String delAvNavn);
 
     List<Kunde> findByMobilnummer(String mobilnummer);

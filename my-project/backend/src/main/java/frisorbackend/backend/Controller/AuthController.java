@@ -1,7 +1,9 @@
 package frisorbackend.backend.Controller;
 
 import frisorbackend.backend.Service.EmailService;
+import frisorbackend.backend.Repository.KundeRepository; // Importer repository
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,13 +13,15 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:5173") // Stemmer for Vite/React!
+@CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
 
     @Autowired
     private EmailService emailService;
 
-    // Lageret som husker kodene
+    @Autowired
+    private KundeRepository kundeRepository; // Koble til databasen
+
     private Map<String, String> kodeLager = new HashMap<>();
 
     public String genererSikkerKode() {
@@ -26,34 +30,38 @@ public class AuthController {
         return String.valueOf(nummer);
     }
 
-
     @PostMapping("/send-kode")
     public ResponseEntity<?> sendVerifisering(@RequestBody Map<String, String> request) {
-        String epost = request.get("epost");
-        String kode = genererSikkerKode();
+        String epost = request.get("epost").trim().toLowerCase();
         
-        kodeLager.put(epost, kode); // lagrer koden knyttet til e-posten
+        // 1. Sjekk om e-posten allerede finnes i databasen
+        if (kundeRepository.existsByEpost(epost)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("message", "Denne e-postadressen er allerede i bruk."));
+        }
+
+        // 2. Generer og send kode hvis e-posten er ledig
+        String kode = genererSikkerKode();
+        kodeLager.put(epost, kode);
         emailService.sendVerifiseringsKode(epost, kode);
         
+        System.out.println("DEBUG: Kode sendt til " + epost + " er " + kode);
         return ResponseEntity.ok(Map.of("message", "Kode sendt!"));
     }
 
-    
     @PostMapping("/verifiser-kode")
     public ResponseEntity<?> verifiserKode(@RequestBody Map<String, String> request) {
-        String epost = request.get("epost");
-        String kodeFraBruker = request.get("kode");
+        String epost = request.get("epost").trim().toLowerCase();
+        String kodeFraBruker = request.get("kode").trim();
 
-        // Hent koden vi faktisk sendte til denne e-posten
         String riktigKode = kodeLager.get(epost);
 
         if (riktigKode != null && riktigKode.equals(kodeFraBruker)) {
-            // Suksess! Vi sletter koden fra lageret så den ikke kan brukes to ganger
-            kodeLager.remove(epost);
+            kodeLager.remove(epost); // Slett koden etter bruk
             return ResponseEntity.ok(Map.of("status", "success", "message", "Koden er gyldig!"));
         } else {
-            // Feil kode
-            return ResponseEntity.status(401).body(Map.of("status", "error", "message", "Feil kode, prøv igjen."));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("status", "error", "message", "Feil eller utløpt kode."));
         }
     }
 }

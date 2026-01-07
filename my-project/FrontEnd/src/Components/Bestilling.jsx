@@ -18,7 +18,8 @@ const Bestilling = () => {
   const [opptatteTider, setOpptatteTider] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Formaterer dato til YYYY-MM-DD
+  const [visValgBoks, setVisValgBoks] = useState(false);
+
   const formaterDato = (d) => {
     if (!d) return "";
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -124,14 +125,14 @@ const Bestilling = () => {
           </div>
         )}
 
-        {/* BEKREFT KNAPP */}
+        {/* BEKREFT KNAPP - Åpner nå valgmenyen først */}
         {!bekreftet && (
           <motion.button
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.6, delay: 0.6 }}
-            onClick={() => setVisBoks(true)}
+            onClick={() => setVisValgBoks(true)}
             disabled={!selectedDate || !selectedTime}
             className={`mt-12 px-10 py-4 rounded-xl text-white text-lg font-semibold shadow-lg transition-all duration-300
               ${!selectedDate || !selectedTime ? 'bg-zinc-400' : 'bg-red-700 hover:bg-red-800 active:scale-95'}`}
@@ -139,6 +140,42 @@ const Bestilling = () => {
             Bekreft bestilling
           </motion.button>
         )}
+
+        {/* NY FUNKSJON: PROFESJONELT VALG MELLOMLEDD */}
+        <AnimatePresence>
+          {visValgBoks && (
+            <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+              <motion.div 
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
+                onClick={() => setVisValgBoks(false)}
+              />
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
+                className="bg-white rounded-3xl p-8 md:p-10 shadow-2xl z-10 max-w-sm w-full text-center"
+              >
+                <h3 className="text-2xl font-black text-zinc-900 mb-6">Velkommen</h3>
+                <div className="flex flex-col gap-4">
+                  <button 
+                    onClick={() => { setVisValgBoks(false); setVisBoks(true); }}
+                    className="w-full bg-zinc-900 text-white font-bold py-4 rounded-xl hover:bg-black transition-all"
+                  >
+                    Jeg har en profil
+                  </button>
+                  <button 
+                    onClick={() => { setVisValgBoks(false); setVisFullRegistrering(true); }}
+                    className="w-full border-2 border-zinc-200 text-zinc-900 font-bold py-4 rounded-xl hover:bg-zinc-50 transition-all"
+                  >
+                    Opprett ny profil
+                  </button>
+                  <button onClick={() => setVisValgBoks(false)} className="text-zinc-400 text-sm mt-2">
+                    Avbryt
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
         <RegistrerKundeBox 
           isOpen={visBoks} onClose={() => setVisBoks(false)} 

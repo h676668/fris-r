@@ -55,3 +55,4 @@ class Data:
             'val': {'text': [x[0] for x in combined[int(n*0.7):int(n*0.85)]], 'label': [x[1] for x in combined[int(n*0.7):int(n*0.85)]]},
             'test': {'text': [x[0] for x in combined[int(n*0.85):]], 'label': [x[1] for x in combined[int(n*0.85):]]}
         }
+        

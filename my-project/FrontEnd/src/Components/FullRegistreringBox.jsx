@@ -5,53 +5,79 @@ const FullRegistreringBox = ({ isOpen, onClose, onConfirm, melding }) => {
   const [mobilnummer, setMobilnummer] = useState("");
   const [epost, setEpost] = useState("");
   
-  // Nye tilstander for selve verifiseringen
   const [visVerifisering, setVisVerifisering] = useState(false);
   const [inputKode, setInputKode] = useState("");
   const [laster, setLaster] = useState(false);
+  const [feilmelding, setFeilmelding] = useState("");
 
   if (!isOpen) return null;
 
-  // STEG 1: Send koden til e-posten via Java
-  const handleSendKode = async () => {
+  // STEG 1: Send koden til e-post
+  const handleSubmitInfo = async (e) => {
+    e.preventDefault();
+    setFeilmelding("");
+
+    const renEpost = epost.trim().toLowerCase();
+    const renMobil = mobilnummer.replace(/\s/g, "");
+
+    // Enkel frontend-validering
+    if (navn.trim().length < 2) return setFeilmelding("Vennligst oppgi fullt navn.");
+    if (!/^\d{8}$/.test(renMobil)) return setFeilmelding("Mobilnummer må være 8 siffer.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(renEpost)) return setFeilmelding("Ugyldig e-postadresse.");
+
     setLaster(true);
     try {
       const response = await fetch('http://localhost:8080/api/auth/send-kode', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ epost: epost }),
+        body: JSON.stringify({ epost: renEpost }),
       });
+
+      // Vi henter ut JSON uansett statuskode for å få tak i feilmeldinger fra Java
+      const data = await response.json();
 
       if (response.ok) {
         setVisVerifisering(true);
       } else {
-        alert("Noe gikk galt ved sending av e-post.");
+        // Her viser vi meldingen fra backenden (f.eks. "E-posten er allerede i bruk")
+        setFeilmelding(data.message || "Kunne ikke sende verifiseringskode.");
       }
-    } catch (error) {
-      console.error("Feil:", error);
+    } catch (err) {
+      setFeilmelding("Nettverksfeil: Kunne ikke kontakte serveren.");
     } finally {
       setLaster(false);
     }
   };
 
   // STEG 2: Sjekk koden og fullfør registrering
-  const handleVerifiserOgFullfor = async () => {
+  const handleSubmitKode = async (e) => {
+    e.preventDefault();
+    setFeilmelding("");
     setLaster(true);
+
+    const renKode = inputKode.trim();
+    const renEpost = epost.trim().toLowerCase();
+
     try {
       const response = await fetch('http://localhost:8080/api/auth/verifiser-kode', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ epost: epost, kode: inputKode }),
+        body: JSON.stringify({ 
+          epost: renEpost, 
+          kode: renKode 
+        }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        // HVIS KODEN ER RIKTIG: Kjør den originale onConfirm-funksjonen din
-        onConfirm({ navn, mobilnummer, epost });
+        // Suksess: Kall onConfirm for å lagre kunden i databasen
+        onConfirm({ navn, mobilnummer, epost: renEpost });
       } else {
-        alert("Feil kode! Vennligst sjekk e-posten din på nytt.");
+        setFeilmelding(data.message || "Feil eller utløpt kode.");
       }
-    } catch (error) {
-      console.error("Feil:", error);
+    } catch (err) {
+      setFeilmelding("Nettverksfeil under verifisering.");
     } finally {
       setLaster(false);
     }
@@ -63,31 +89,35 @@ const FullRegistreringBox = ({ isOpen, onClose, onConfirm, melding }) => {
       
       <div className="bg-white rounded-3xl p-8 md:p-10 shadow-2xl z-10 max-w-sm w-full text-center animate-fade-up">
         <h3 className="text-2xl font-black text-zinc-900 mb-2">
-            {visVerifisering ? "Bekreft din e-post" : "Bli kunde"}
+            {visVerifisering ? "Bekreft e-post" : "Bli kunde"}
         </h3>
-        <p className="text-zinc-500 mb-8 text-sm">
-            {visVerifisering ? `Tast inn koden vi sendte til ${epost}` : melding}
+        <p className="text-zinc-500 mb-6 text-sm">
+            {visVerifisering ? `Skriv inn koden sendt til ${epost}` : melding}
         </p>
+
+        {feilmelding && (
+          <p className="text-red-600 text-xs mb-4 font-bold bg-red-50 p-3 rounded-xl border border-red-100">
+            {feilmelding}
+          </p>
+        )}
       
-        <div className="space-y-5">
+        <div className="space-y-4">
           {!visVerifisering ? (
-            /* --- VISER REGISTRERINGSSKJEMA --- */
-            <>
-              <input type="text" value={navn} onChange={(e) => setNavn(e.target.value)} placeholder="Fullt navn" className="w-full text-center text-lg font-semibold py-3 border-b-2 border-zinc-200 focus:border-red-600 outline-none transition-colors placeholder:text-zinc-300" />
-              <input type="tel" value={mobilnummer} onChange={(e) => setMobilnummer(e.target.value)} placeholder="Mobilnummer" className="w-full text-center text-lg font-semibold py-3 border-b-2 border-zinc-200 focus:border-red-600 outline-none transition-colors placeholder:text-zinc-300" />
-              <input type="email" value={epost} onChange={(e) => setEpost(e.target.value)} placeholder="E-postadresse" className="w-full text-center text-lg font-semibold py-3 border-b-2 border-zinc-200 focus:border-red-600 outline-none transition-colors placeholder:text-zinc-300" />
+            <form onSubmit={handleSubmitInfo} className="space-y-4">
+              <input type="text" value={navn} onChange={(e) => setNavn(e.target.value)} placeholder="Fullt navn" className="w-full text-center text-lg font-semibold py-3 border-b-2 border-zinc-200 focus:border-red-600 outline-none transition-colors" />
+              <input type="tel" value={mobilnummer} onChange={(e) => setMobilnummer(e.target.value)} placeholder="Mobilnummer" className="w-full text-center text-lg font-semibold py-3 border-b-2 border-zinc-200 focus:border-red-600 outline-none transition-colors" />
+              <input type="email" value={epost} onChange={(e) => setEpost(e.target.value)} placeholder="E-postadresse" className="w-full text-center text-lg font-semibold py-3 border-b-2 border-zinc-200 focus:border-red-600 outline-none transition-colors" />
               
               <button 
-                onClick={handleSendKode}
+                type="submit"
                 disabled={!navn || !mobilnummer || !epost || laster}
-                className={`w-full font-bold py-4 rounded-xl transition-all shadow-lg mt-4 ${(!navn || !mobilnummer || !epost || laster) ? 'bg-zinc-200 text-zinc-400 cursor-not-allowed' : 'bg-red-700 text-white hover:bg-red-800'}`}
+                className={`w-full font-bold py-4 rounded-xl shadow-lg mt-4 transition-all ${(!navn || !mobilnummer || !epost || laster) ? 'bg-zinc-200 text-zinc-400' : 'bg-red-700 text-white hover:bg-red-800'}`}
               >
                 {laster ? "Sender..." : "Send verifiseringskode"}
               </button>
-            </>
+            </form>
           ) : (
-            /* --- VISER KODE-FELT --- */
-            <>
+            <form onSubmit={handleSubmitKode} className="space-y-4">
               <input 
                 type="text" 
                 maxLength="6"
@@ -95,19 +125,24 @@ const FullRegistreringBox = ({ isOpen, onClose, onConfirm, melding }) => {
                 onChange={(e) => setInputKode(e.target.value)} 
                 placeholder="000000" 
                 className="w-full text-center text-3xl font-bold py-3 border-b-2 border-red-600 outline-none tracking-widest"
+                autoFocus
               />
               <button 
-                onClick={handleVerifiserOgFullfor}
+                type="submit"
                 disabled={inputKode.length < 6 || laster}
-                className={`w-full font-bold py-4 rounded-xl transition-all shadow-lg mt-4 ${(inputKode.length < 6 || laster) ? 'bg-zinc-200 text-zinc-400 cursor-not-allowed' : 'bg-red-700 text-white hover:bg-red-800'}`}
+                className={`w-full font-bold py-4 rounded-xl shadow-lg mt-4 transition-all ${(inputKode.length < 6 || laster) ? 'bg-zinc-200 text-zinc-400' : 'bg-red-700 text-white hover:bg-red-800'}`}
               >
                 {laster ? "Sjekker..." : "Fullfør registrering"}
               </button>
-              <button onClick={() => setVisVerifisering(false)} className="text-zinc-400 text-xs underline">Gå tilbake</button>
-            </>
+              <button type="button" onClick={() => {setVisVerifisering(false); setFeilmelding("");}} className="text-zinc-400 text-xs underline block mx-auto mt-2">
+                Endre e-postadresse
+              </button>
+            </form>
           )}
 
-          <button onClick={onClose} className="text-zinc-400 text-sm hover:text-zinc-600 transition-colors pt-2">Avbryt</button>
+          <button type="button" onClick={onClose} className="text-zinc-400 text-sm hover:text-zinc-600 transition-colors pt-2">
+            Avbryt
+          </button>
         </div>
       </div>
     </div>

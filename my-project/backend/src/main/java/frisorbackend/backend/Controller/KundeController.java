@@ -24,7 +24,6 @@ public class KundeController {
        @Autowired
     private KundeService KundeService;
 
-
     @GetMapping("kunder/{Mobilnummer}")
     public ResponseEntity <Kunde> hentkunde(@PathVariable String Mobilnummer ) throws KundeIkkeFunnetException {
         Kunde kunde = KundeService.hentKundeEttermobil(Mobilnummer);
@@ -38,10 +37,5 @@ public class KundeController {
         Kunde nykunde = KundeService.leggNyKunde(kunde.getMobilnummer(), kunde.getNavn(), kunde.getEpost());
         return ResponseEntity.status(HttpStatus.CREATED).body(nykunde);
     }
-
-    
-        
-    
-    
 
 }

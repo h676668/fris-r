@@ -24,8 +24,6 @@ public class BestillingController{
     @Autowired
     private BestillingService BestillingService;
 
-
-
     @GetMapping("/Bestillinger/mobil/{mobilnummer}")
     public ResponseEntity<List<Bestilling>> getBestillingerByMobilnummer(@PathVariable String mobilnummer) {
         List<Bestilling> bestillinger = BestillingService.hentBestillingerByMobilnummer(mobilnummer);
@@ -36,7 +34,6 @@ public class BestillingController{
         
         return ResponseEntity.ok(bestillinger);
     }
-
 
     // Denne metode brukes for å vise hvilke tidspunkter er ledige for en spesefikk dato
     @GetMapping("/Bestillinger/{dato}")
@@ -61,6 +58,7 @@ public class BestillingController{
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     }
     
 
