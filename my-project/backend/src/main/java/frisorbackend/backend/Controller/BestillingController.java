@@ -48,13 +48,26 @@ public class BestillingController{
 }
     
 @PostMapping("/Bestillinger")
-public ResponseEntity<?> opprettBestilling(@Valid @RequestBody Bestilling nyBestilling) {
-    // Hvis valideringen feiler, vil Spring automatisk returnere 400 Bad Request
+public ResponseEntity<?> opprettBestilling(@Valid @RequestBody Bestilling nyBestilling, org.springframework.validation.BindingResult bindingResult) {
+    
+    // 1. FANG OPP VALIDERINGSFEIL (f.eks. feil datoformat)
+    if (bindingResult.hasErrors()) {
+        String feilmelding = bindingResult.getFieldError().getDefaultMessage();
+        return ResponseEntity.badRequest().body(Map.of("message", feilmelding));
+    }
+
     try {
+        // 2. SJEKK OM KUNDEN FAKTISK FINNES (Sikkerhet)
+        if (nyBestilling.getKunde() == null || nyBestilling.getKunde().getMobilnummer() == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Bestillingen mangler gyldig kunde."));
+        }
+
         Bestilling lagret = BestillingService.lagNyBestilling(nyBestilling);
         return new ResponseEntity<>(lagret, HttpStatus.CREATED);
+        
     } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        // 3. HÅNDTER LEDIGE TIDER ELLER DATABASEFEIL
+        return ResponseEntity.status(HttpStatus.CONFLICT) // Bruk 409 Conflict for opptatte tider
                              .body(Map.of("message", e.getMessage()));
     }
 }
