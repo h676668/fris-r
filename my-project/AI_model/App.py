@@ -54,7 +54,7 @@ SALONG_INFO = {
 
 def hent_bestillinger_fra_api(mobilnummer):
     """Kobler seg mot Java-backend for å hente reservasjoner."""
-    url = f"http://localhost:8080/Bestillinger/mobil/{mobilnummer}"
+    url = f"https://frisor-backend.onrender.com/Bestillinger/mobil/{mobilnummer}"
     try:
         response = requests.get(url, timeout=5)
         if response.status_code == 200:

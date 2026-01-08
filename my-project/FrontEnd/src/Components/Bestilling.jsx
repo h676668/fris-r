@@ -30,10 +30,19 @@ const Bestilling = () => {
       setIsLoading(true);
       try {
         const res = await fetch(`https://frisor-backend.onrender.com/Bestillinger/${formaterDato(selectedDate)}`);
-        const data = await res.json();
-        setOpptatteTider(res.ok ? data.map(b => b.tidspunkt) : []);
-      } catch (err) { console.error(err); }
-      finally { setIsLoading(false); }
+
+        if (res.ok && res.status !== 204) {
+          const data = await res.json();
+          setOpptatteTider(Array.isArray(data) ? data.map(b => b.tidspunkt) : []);
+        } else {
+          setOpptatteTider([]); 
+        }
+      } catch (err) { 
+        console.error("Feil ved henting av tider:", err); 
+        setOpptatteTider([]);
+      } finally { 
+        setIsLoading(false); 
+      }
     })();
   }, [selectedDate]);
 
