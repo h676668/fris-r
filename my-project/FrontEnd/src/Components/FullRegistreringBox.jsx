@@ -26,7 +26,7 @@ const FullRegistreringBox = ({ isOpen, onClose, onConfirm, melding }) => {
 
     setLaster(true);
     try {
-      const response = await fetch('http://localhost:8080/api/auth/send-kode', {
+      const response = await fetch('https://frisor-backend.onrender.com/api/auth/send-kode', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // VIKTIG: Vi sender nå både epost og mobilnummer slik at backenden kan sjekke begge
@@ -61,7 +61,7 @@ const FullRegistreringBox = ({ isOpen, onClose, onConfirm, melding }) => {
     const renEpost = epost.trim().toLowerCase();
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/verifiser-kode', {
+      const response = await fetch('https://frisor-backend.onrender.com/api/auth/verifiser-kode', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

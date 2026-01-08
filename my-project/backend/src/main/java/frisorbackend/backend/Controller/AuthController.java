@@ -13,7 +13,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "https://www.bergenfrisor.no")
+@CrossOrigin(origins = {"https://www.bergenfrisor.no", "http://localhost:5173"})
 public class AuthController {
 
     @Autowired

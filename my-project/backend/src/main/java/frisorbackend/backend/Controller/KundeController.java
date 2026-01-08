@@ -13,7 +13,7 @@ import jakarta.validation.Valid; // Viktig import
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = "https://www.bergenfrisor.no")
+@CrossOrigin(origins = {"https://www.bergenfrisor.no", "http://localhost:5173"})
 public class KundeController {
 
     @Autowired

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 
 @RestController
-@CrossOrigin(origins = "https://www.bergenfrisor.no")
+@CrossOrigin(origins = {"https://www.bergenfrisor.no", "http://localhost:5173"})
 public class BestillingController{
 
     @Autowired

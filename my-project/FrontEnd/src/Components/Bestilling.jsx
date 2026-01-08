@@ -29,7 +29,7 @@ const Bestilling = () => {
     (async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(`http://localhost:8080/Bestillinger/${formaterDato(selectedDate)}`);
+        const res = await fetch(`https://frisor-backend.onrender.com/Bestillinger/${formaterDato(selectedDate)}`);
         const data = await res.json();
         setOpptatteTider(res.ok ? data.map(b => b.tidspunkt) : []);
       } catch (err) { console.error(err); }
@@ -40,9 +40,9 @@ const Bestilling = () => {
   const fullforBestilling = async (mobilnummer) => {
     setErFeil(false);
     try {
-      const res = await fetch(`http://localhost:8080/kunder/${mobilnummer}`);
+      const res = await fetch(`https://frisor-backend.onrender.com/kunder/${mobilnummer}`);
       if (res.ok) {
-        const saveRes = await fetch("http://localhost:8080/Bestillinger", {
+        const saveRes = await fetch("https://frisor-backend.onrender.com/Bestillinger", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ dato: formaterDato(selectedDate), tidspunkt: selectedTime, kunde: { mobilnummer } }),
@@ -192,7 +192,7 @@ const Bestilling = () => {
           isOpen={visFullRegistrering} 
           onClose={() => setVisFullRegistrering(false)} 
           onConfirm={async (data) => {
-            const res = await fetch("http://localhost:8080/kunder", { 
+            const res = await fetch("https://frisor-backend.onrender.com/kunder", { 
                 method: "POST", 
                 headers: { "Content-Type": "application/json" }, 
                 body: JSON.stringify(data) 
