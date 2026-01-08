@@ -8,6 +8,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 @Entity
 @Table(name = "bestilling")
 public class Bestilling {
@@ -25,6 +27,7 @@ public class Bestilling {
     @Column(nullable = false)
     @NotNull(message = "Dato må oppgis")
     @FutureOrPresent(message = "Dato kan ikke være i fortiden")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dato; 
 
     @Column(nullable = false, length = 5)
