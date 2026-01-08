@@ -39,29 +39,46 @@ const Bestilling = () => {
 
   const fullforBestilling = async (mobilnummer) => {
     setErFeil(false);
+    // Vi setter en melding mens vi venter, slik at brukeren ser at noe skjer
+    setBoksMelding("Lagrer din bestilling..."); 
+    
     try {
+      // STEG 1: Sjekk om kunden eksisterer
       const res = await fetch(`https://frisor-backend.onrender.com/kunder/${mobilnummer}`);
+      
       if (res.ok) {
+        // STEG 2: Send selve bestillingen
         const saveRes = await fetch("https://frisor-backend.onrender.com/Bestillinger", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ dato: formaterDato(selectedDate), tidspunkt: selectedTime, kunde: { mobilnummer } }),
+          body: JSON.stringify({ 
+            dato: formaterDato(selectedDate), 
+            tidspunkt: selectedTime, 
+            kunde: { mobilnummer: mobilnummer } 
+          }),
         });
-        
-        const data = await saveRes.json();
-        
+
+        // STEG 3: Sjekk om vi fikk JSON tilbake før vi leser den (Dette stopper krasjen!)
+        let data = {};
+        const contentType = saveRes.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          data = await saveRes.json();
+        }
+
         if (saveRes.ok) {
           setBekreftet(true);
           setVisBoks(false);
         } else {
           setErFeil(true);
-          setBoksMelding(data.message || "Kunne ikke fullføre bestilling.");
+          // Nå bruker vi feilmeldingen fra Java-BindingResult hvis den finnes
+          setBoksMelding(data.message || "Tiden er kanskje opptatt, vennligst prøv en annen.");
         }
       } else {
         setErFeil(true);
-        setBoksMelding("Vi finner ingen registrert kunde med dette mobilnummeret !");
+        setBoksMelding("Vi finner ingen registrert kunde med dette mobilnummeret!");
       }
     } catch (err) {
+      console.error("Nettverksfeil:", err);
       setErFeil(true);
       setBoksMelding("Nettverksfeil: Kunne ikke kontakte serveren.");
     }

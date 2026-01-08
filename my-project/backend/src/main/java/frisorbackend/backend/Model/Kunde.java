@@ -26,48 +26,25 @@ public class Kunde {
     @Email(message = "Ugyldig e-postformat")
     private String epost;
     
-
-   
     public Kunde() {}
 
-   
     public Kunde(String mobilnummer, String navn, String epost) {
         this.mobilnummer = mobilnummer;
         this.navn = navn;
         this.epost = epost;
     }
     
-    // Getters og Setters
-    public String getNavn() {
-        return navn;
-    }
+    public String getNavn() { return navn; }
+    public void setNavn(String navn) { this.navn = navn; }
     
-    public void setNavn(String navn) {
-        this.navn = navn;
-    }
+    public String getMobilnummer() { return mobilnummer; }
+    public void setMobilnummer(String mobilnummer) { this.mobilnummer = mobilnummer; }
     
-    public String getMobilnummer() {
-        return mobilnummer;
-    }
-    
-    public void setMobilnummer(String mobilnummer) {
-        this.mobilnummer = mobilnummer;
-    }
-    
-    public String getEpost() {
-        return epost;
-    }
-    
-    public void setEpost(String epost) {
-        this.epost = epost;
-    }
+    public String getEpost() { return epost; }
+    public void setEpost(String epost) { this.epost = epost; }
     
     @Override
     public String toString() {
-        return "Kunde{" +
-                "mobilnummer='" + mobilnummer + '\'' +
-                ", navn='" + navn + '\'' +
-                ", epost='" + epost + '\'' +
-                '}';
+        return "Kunde{" + "mobilnummer='" + mobilnummer + '\'' + ", navn='" + navn + '\'' + ", epost='" + epost + '\'' + '}';
     }
 }
