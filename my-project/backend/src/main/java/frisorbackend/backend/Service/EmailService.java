@@ -18,24 +18,19 @@ public class EmailService {
     private String sendGridApiKey;
 
     public void sendVerifiseringsKode(String tilEpost, String kode) {
-        // Avsender må være nøyaktig den du verifiserte i SendGrid
         Email from = new Email("bergenfrisorr@gmail.com"); 
-        String subject = "Din verifiseringskode fra Bergen Frisør";
+        String subject = "Bekreft din bestilling - Bergen Frisør";
         Email to = new Email(tilEpost);
         
-        // Vi bruker en litt fyldigere tekst for å unngå spam-filteret
+        // Teksten du valgte
         String tekstInnhold = "Hei!\n\n" +
-                             "Takk for at du bruker Bergen Frisør. Din verifiseringskode er:\n\n" +
-                             "** " + kode + " **\n\n" +
-                             "Skriv inn denne koden i appen for å fullføre din registrering.\n" +
-                             "Hvis du ikke har bedt om denne koden, kan du trygt se bort fra denne e-posten.\n\n" +
-                             "Vennlig hilsen,\n" +
+                             "Din kode for å bekrefte bestillingen hos Bergen Frisør er: " + kode + "\n\n" +
+                             "Tast inn denne koden på nettsiden for å fullføre bookingen.\n\n" +
+                             "Med vennlig hilsen,\n" +
                              "Bergen Frisør";
 
         Content content = new Content("text/plain", tekstInnhold);
         Mail mail = new Mail(from, subject, to, content);
-        
-        // Legger til en Reply-To for å virke mer seriøs overfor Gmail
         mail.setReplyTo(new Email("bergenfrisorr@gmail.com"));
 
         SendGrid sg = new SendGrid(sendGridApiKey);
@@ -47,13 +42,9 @@ public class EmailService {
             request.setBody(mail.build());
             Response response = sg.api(request);
             
-            // Logger resultatet så du kan se det i Render-loggen
             System.out.println("SendGrid Status: " + response.getStatusCode());
-            if (response.getStatusCode() >= 400) {
-                System.err.println("SendGrid feilmelding: " + response.getBody());
-            }
         } catch (IOException ex) {
-            System.err.println("Kritisk feil ved sending av e-post: " + ex.getMessage());
+            System.err.println("Feil ved sending: " + ex.getMessage());
         }
     }
 }
