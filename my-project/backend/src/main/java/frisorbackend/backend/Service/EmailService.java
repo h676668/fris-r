@@ -1,32 +1,42 @@
 package frisorbackend.backend.Service;
 
-// DISSE IMPORTENE MANGLER DU:
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import java.io.IOException;
 
 @Service
 public class EmailService {
 
-    @Autowired
-    private JavaMailSender mailSender;
+    // Denne henter automatisk verdien fra Render (miljøvariabelen)
+    @Value("${SENDGRID_API_KEY}")
+    private String sendGridApiKey;
 
     public void sendVerifiseringsKode(String tilEpost, String kode) {
-        SimpleMailMessage melding = new SimpleMailMessage();
+        // VIKTIG: Denne e-posten må være nøyaktig den du verifiserte i SendGrid
+        Email from = new Email("bergenfrisorr@gmail.com"); 
+        String subject = "Verifiseringskode - Bergen Frisør";
+        Email to = new Email(tilEpost);
+        Content content = new Content("text/plain", "Hei!\n\nDin kode for Bergen Frisør er: " + kode);
         
-        // Slik ser det profesjonelt ut i innboksen
-        melding.setFrom("Bergen Frisør <bergenfrisor@gmail.com>");
-        melding.setTo(tilEpost);
-        melding.setSubject("Verifiseringskode - Bergen Frisør");
-        melding.setText("Hei!\n\nDin kode for å bekrefte bestillingen hos Bergen Frisør er: " + kode + 
-                       "\n\nTast inn denne koden på nettsiden for å fullføre bookingen.\n\nMed vennlig hilsen,\nBergen Frisør");
+        Mail mail = new Mail(from, subject, to, content);
+        SendGrid sg = new SendGrid(sendGridApiKey);
+        Request request = new Request();
 
         try {
-            mailSender.send(melding);
-            System.out.println("Suksess: Kode sendt til " + tilEpost);
-        } catch (Exception e) {
-            System.err.println("FEIL: Kunne ikke sende e-post: " + e.getMessage());
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            Response response = sg.api(request);
+            System.out.println("SendGrid Status: " + response.getStatusCode());
+        } catch (IOException ex) {
+            System.err.println("FEIL ved sending: " + ex.getMessage());
         }
     }
 }

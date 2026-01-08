@@ -23,3 +23,5 @@ EXPOSE 8080
 
 # Kommandoen som starter backenden din
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
+
