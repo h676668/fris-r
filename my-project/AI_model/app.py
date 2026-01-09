@@ -96,6 +96,15 @@ def hent_smart_svar(user_input, intent):
         print(f"AI-feil: {e}")
         return "Jeg har litt problemer med å kontakte 'hovedhjernen' min, men vi tilbyr klipp fra 349,-. Hva kan jeg hjelpe med?"
 
+
+@app.route('/')
+def home():
+    return jsonify({
+        "status": "AI Model is running",
+        "message": "Welcome to Bergen Frisør AI API"
+    }), 200
+
+
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json
