@@ -10,28 +10,29 @@ from Data import Data
 from AiModel import AIModel
 
 # --- KONFIGURASJON OG SIKKERHET ---
-load_dotenv()  # Laster variabler fra .env-filen
+load_dotenv()  # Laster variabler fra .env-filen (lokalt)
 
 app = Flask(__name__)
-CORS(app)
 
-# Henter token fra .env
+# OPPDATERT: Tillater kun forespørsler fra ditt domene for bedre sikkerhet
+CORS(app, resources={r"/*": {"origins": ["https://www.bergenfrisor.no", "https://bergenfrisor.no"]}})
+
+# Henter token fra miljøvariabler (viktig for Render)
 HF_TOKEN = os.getenv("HF_TOKEN")
 
 if not HF_TOKEN:
-    print("❌ FEIL: Fant ikke HF_TOKEN i .env-filen!")
+    print("❌ FEIL: Fant ikke HF_TOKEN! Husk å legge den inn i Render Environment Variables.")
 else:
     print(f"✅ Token lastet inn (starter med: {HF_TOKEN[:5]}...)")
 
-
 client = OpenAI(base_url="https://router.huggingface.co/v1", api_key=HF_TOKEN)
 
-
+# Initialiserer data og modell
 ds = Data()
 ai = AIModel()
 
+# SIKRER DINE KRAV: Dataene blir delt i train, validation og test ved oppstart
 print("🔄 Laster og splitter data (Training, Validation, Test)...")
-
 data_splits = ds.get_split_data()
 
 print("🧠 Trener lokal AI-modell...")
@@ -49,8 +50,6 @@ SALONG_INFO = {
         "Skjeggtrim": "fra 249,- (Forming og pleie av skjegg for en velstelt fremtoning)"
     }
 }
-
-
 
 def hent_bestillinger_fra_api(mobilnummer):
     """Kobler seg mot Java-backend for å hente reservasjoner."""
@@ -95,10 +94,7 @@ def hent_smart_svar(user_input, intent):
         return completion.choices[0].message.content
     except Exception as e:
         print(f"AI-feil: {e}")
-      
         return "Jeg har litt problemer med å kontakte 'hovedhjernen' min, men vi tilbyr klipp fra 349,-. Hva kan jeg hjelpe med?"
-
-
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -108,14 +104,14 @@ def predict():
     if not user_input:
         return jsonify({"reply": "Hei! Hva kan jeg hjelpe deg med i dag?"})
 
-   
+    # Sperre for booking-forespørsler
     nei_ord = ["booke", "bestille", "reserve", "avbestille", "kansellere", "endre"]
     if any(ord in user_input.lower() for ord in nei_ord):
         return jsonify({
             "reply": "Jeg kan dessverre ikke endre eller booke timer her. Vennligst ring oss, så hjelper vi deg gjerne over telefon!"
         })
 
- 
+    # Sjekk for mobilnummer (8 siffer) for å hente timer
     kun_tall = "".join(filter(str.isdigit, user_input))
     if len(kun_tall) == 8:
         res_data, status = hent_bestillinger_fra_api(kun_tall)
@@ -128,6 +124,7 @@ def predict():
         else:
             return jsonify({"reply": "Beklager, jeg får ikke kontakt med bookingsystemet akkurat nå."})
 
+    # Bruker AI-modellen for andre spørsmål
     intent, confidence = ai.predict_safe(user_input)
     reply = hent_smart_svar(user_input, intent)
 
@@ -137,5 +134,9 @@ def predict():
         "confidence": float(confidence)
     })
 
+# OPPDATERT: Sørger for at Render kan styre port og host
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    # Render setter PORT miljøvariabelen automatisk
+    port = int(os.environ.get("PORT", 5000))
+    # host="0.0.0.0" er nødvendig for at tjenesten skal være synlig utad
+    app.run(host="0.0.0.0", port=port, debug=False)
