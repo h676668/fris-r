@@ -96,6 +96,15 @@ def hent_smart_svar(user_input, intent):
         print(f"AI-feil: {e}")
         return "Beklager, tjenesten er midlertidig utilgjengelig. Vennligst prøv igjen om en liten stund"
 
+       
+@app.route('/')
+def home():
+    return jsonify({
+        "status": "AI Model is running",
+        "message": "Welcome to Bergen Frisør AI API"
+    }), 200
+
+
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json
