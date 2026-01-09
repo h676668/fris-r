@@ -20,7 +20,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 
 @RestController
-@CrossOrigin(origins = {"https://www.bergenfrisor.no", "http://localhost:5173"})
+@CrossOrigin(origins = {
+    "https://www.bergenfrisor.no", 
+    "https://bergenfrisor.no", 
+    "https://fris-r-149w.vercel.app", // Legg til denne (din nåværende live-lenke)
+    "http://localhost:5173"
+})
 public class BestillingController{
 
     @Autowired
