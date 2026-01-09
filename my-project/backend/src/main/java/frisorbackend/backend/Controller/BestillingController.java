@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,16 +32,23 @@ public class BestillingController{
     @Autowired
     private BestillingService BestillingService;
 
-    @GetMapping("/Bestillinger/mobil/{mobilnummer}")
-    public ResponseEntity<List<Bestilling>> getBestillingerByMobilnummer(@PathVariable String mobilnummer) {
-        List<Bestilling> bestillinger = BestillingService.hentBestillingerByMobilnummer(mobilnummer);
-        
-        if (bestillinger.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        
-        return ResponseEntity.ok(bestillinger);
+   @GetMapping("/Bestillinger/mobil/{mobilnummer}")
+public ResponseEntity<List<Bestilling>> getBestillingerByMobilnummer(@PathVariable String mobilnummer) {
+    List<Bestilling> alleBestillinger = BestillingService.hentBestillingerByMobilnummer(mobilnummer);
+    
+    LocalDate iDag = LocalDate.now();
+
+// Beholder alle bestillinger som IKKE er før i dag
+    List<Bestilling> fremtidigeBestillinger = alleBestillinger.stream()
+        .filter(b -> !b.getDato().isBefore(iDag))
+        .collect(Collectors.toList());
+    
+    if (fremtidigeBestillinger.isEmpty()) {
+        return ResponseEntity.noContent().build();
     }
+    
+    return ResponseEntity.ok(fremtidigeBestillinger);
+}
 
     // Denne metode brukes for å vise hvilke tidspunkter er ledige for en spesefikk dato
     @GetMapping("/Bestillinger/{dato}")

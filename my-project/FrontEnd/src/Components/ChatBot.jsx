@@ -84,7 +84,7 @@ const ChatBot = () => {
                       <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">Dette kan jeg hjelpe med:</p>
                       <ul className="text-xs text-zinc-600 space-y-2">
                         <li className="flex items-center gap-2">💰 <span>Pris</span></li>
-                        <li className="flex items-center gap-2">📅 <span>Når var avtalen min?</span></li>
+                        <li className="flex items-center gap-2">📅 <span>Når er avtalen min?</span></li>
                         <li className="flex items-center gap-2">📍 <span>Lokasjon</span></li>
                         <li className="flex items-center gap-2">🕒 <span>Åpningstider</span></li>
                       </ul>
