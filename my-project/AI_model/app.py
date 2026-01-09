@@ -94,16 +94,7 @@ def hent_smart_svar(user_input, intent):
         return completion.choices[0].message.content
     except Exception as e:
         print(f"AI-feil: {e}")
-        return "Jeg har litt problemer med å kontakte 'hovedhjernen' min, men vi tilbyr klipp fra 349,-. Hva kan jeg hjelpe med?"
-
-
-@app.route('/')
-def home():
-    return jsonify({
-        "status": "AI Model is running",
-        "message": "Welcome to Bergen Frisør AI API"
-    }), 200
-
+        return "Beklager, tjenesten er midlertidig utilgjengelig. Vennligst prøv igjen om en liten stund"
 
 @app.route('/predict', methods=['POST'])
 def predict():
