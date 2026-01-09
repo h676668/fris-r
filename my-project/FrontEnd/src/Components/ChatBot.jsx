@@ -31,7 +31,7 @@ const ChatBot = () => {
     setIsLoading(true); // Start animasjon
 
     try {
-      const response = await fetch('https://frisor-ai-service.onrender.com/predict', {
+      const response = await fetch('https://frisor-ai-model.onrender.com/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: textToSend }),
