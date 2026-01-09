@@ -5,7 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { ledigeTider } from '../constants';
 import BakgrunnElementer from './BakgrunnElementer';
 import RegistrerKundeBox from './RegistrerKundeBox';
-import FullRegistreringBox from './FullRegistreringbox';
+import FullRegistreringBox from "./FullRegistreringBox";
 
 const Bestilling = () => {
   const [selectedDate, setSelectedDate] = useState(null);
